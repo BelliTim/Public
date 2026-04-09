@@ -9,6 +9,43 @@
 
 <style>
 
+.slider{
+position:relative;
+max-width:600px;
+margin:auto;
+}
+
+.slide{
+width:100%;
+display:none;
+border-radius:10px;
+}
+
+.slide.active{
+display:block;
+}
+
+.prev,.next{
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+background:rgba(0,0,0,0.6);
+color:white;
+border:none;
+font-size:22px;
+padding:10px;
+cursor:pointer;
+}
+
+.prev{left:10px;}
+.next{right:10px;}
+
+.car-info{
+text-align:center;
+margin-top:10px;
+opacity:0.8;
+}
+
 /* Passwort Overlay */
 
 #passwordOverlay{
@@ -257,33 +294,62 @@ scroll-behavior:smooth;
 
 <div id="garageAlt"></div>
 
+<h3>Opel Corsa C</h3>
+
+<div class="slider">
+
+<button class="prev" onclick="changeSlide(-1)">❮</button>
+
+<img class="slide active" src="/images/IMG_4824.jpeg">
+<img class="slide" src="/images/IMG_4825.jpeg">
+<img class="slide" src="/images/IMG_4827.jpeg">
+<img class="slide" src="/images/IMG_4829.jpeg">
+<img class="slide" src="/images/IMG_4831.jpeg">
+
+<button class="next" onclick="changeSlide(1)">❯</button>
+
+</div>
+
+<div class="car-info">
+<p>Motor: 1.2</p>
+<p>PS: 70</p>
+<p>Sonderausstattung: Panoramadach</p>
 </div>
 
 </div>
 
-
-<div class="upload-box">
-
-<h3>Eintrag hinzufügen</h3>
-
-<input type="text" id="titel" placeholder="Titel">
-
-<textarea id="beschreibung" placeholder="Beschreibung"></textarea>
-
-<input type="file" id="bilder" multiple accept="image/*">
-
-<select id="kategorie">
-<option value="garageAktuell">Aktuell</option>
-<option value="garageAlt">Alt</option>
-</select>
-
-<button onclick="addEntry()">Eintrag hinzufügen</button>
-
 </div>
+
+
+
 
 </section>
 
 <script>
+
+let slideIndex = 0;
+const slides = document.querySelectorAll(".slide");
+
+function showSlide(index){
+slides.forEach(s => s.classList.remove("active"));
+slides[index].classList.add("active");
+}
+
+function changeSlide(n){
+
+slideIndex += n;
+
+if(slideIndex >= slides.length){
+slideIndex = 0;
+}
+
+if(slideIndex < 0){
+slideIndex = slides.length-1;
+}
+
+showSlide(slideIndex);
+
+}
 
 function addEntry(){
 
@@ -297,8 +363,14 @@ const container = document.getElementById(kategorie);
 const entry = document.createElement("div");
 entry.className = "garage-entry";
 
-let html = "<h4>"+titel+"</h4>";
-html += "<p>"+beschreibung+"</p>";
+const titleEl = document.createElement("h4");
+titleEl.innerText = titel;
+
+const descEl = document.createElement("p");
+descEl.innerText = beschreibung;
+
+entry.appendChild(titleEl);
+entry.appendChild(descEl);
 
 let count = 0;
 
@@ -323,13 +395,9 @@ count++;
 
 }
 
-entry.innerHTML = html;
-
 container.appendChild(entry);
 
 }
-
-
 
 function checkPassword(){
 
