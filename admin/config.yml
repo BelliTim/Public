@@ -1,6 +1,6 @@
 backend:
   name: github
-  repo: DEINUSERNAME/DEINREPO
+  repo: BelliTim/Public
 
 media_folder: "images"
 public_folder: "/images"
