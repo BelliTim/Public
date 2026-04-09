@@ -1,6 +1,7 @@
 backend:
   name: github
   repo: BelliTim/Public
+  branch: main
 
 media_folder: "images"
 public_folder: "/images"
@@ -9,7 +10,8 @@ collections:
 
   - name: "garage"
     label: "Garage"
-    folder: "garage"
+    folder: "content/garage"
+    
     create: true
 
     fields:
