@@ -24,33 +24,33 @@ svg{
   max-width:1100px;
 }
 
-/* Länder */
-.country{
-  cursor:pointer;
-  transition: all 0.25s ease;
+/* Standard Länder */
+.land{
+  fill:#1f2937;
+  stroke:#0b0f19;
+  stroke-width:1;
 }
 
-/* Hover / Tap Effekt */
-.country:hover,
-.country:active{
-  transform: scale(1.03);
-  filter: brightness(1.2);
+/* Deine Länder */
+.active{
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.active:hover{
+  transform:scale(1.03);
+  filter:brightness(1.2);
 }
 
 /* Tooltip */
-.tooltip{
+#tooltip{
   position:absolute;
   background:#111;
-  padding:10px 14px;
-  border-radius:12px;
+  padding:10px;
+  border-radius:10px;
   display:none;
   pointer-events:none;
   font-size:14px;
-}
-
-.tooltip img{
-  width:40px;
-  margin-top:5px;
 }
 
 </style>
@@ -60,153 +60,95 @@ svg{
 
 <h1>Welt</h1>
 
-<div id="tooltip" class="tooltip"></div>
+<div id="tooltip"></div>
 
 <svg viewBox="0 0 1000 500">
 
+<!-- GANZE WELT (vereinfacht Kontinente) -->
+
+<!-- Amerika -->
+<path class="land" d="M100,200 L250,200 L280,350 L150,370 Z"/>
+
+<!-- Europa -->
+<path class="land" d="M450,200 L600,220 L580,300 L460,290 Z"/>
+
+<!-- Afrika -->
+<path class="land" d="M500,300 L580,300 L560,420 L480,400 Z"/>
+
+<!-- Asien -->
+<path class="land" d="M650,200 L900,250 L880,380 L700,350 Z"/>
+
+<!-- DEINE LÄNDER -->
+
+<!-- USA -->
+<path class="active" fill="url(#us)"
+d="M120,260 L260,250 L280,320 L150,330 Z"
+onmousemove="show(event,'USA','https://flagcdn.com/w40/us.png')"
+onmouseleave="hide()"/>
+
+<!-- Frankreich -->
+<circle class="active" cx="500" cy="260" r="12"
+fill="url(#fr)"
+onmousemove="show(event,'Frankreich','https://flagcdn.com/w40/fr.png')"
+onmouseleave="hide()"/>
+
+<!-- Spanien -->
+<circle class="active" cx="480" cy="290" r="10"
+fill="url(#es)"
+onmousemove="show(event,'Spanien','https://flagcdn.com/w40/es.png')"
+onmouseleave="hide()"/>
+
+<!-- Italien -->
+<circle class="active" cx="540" cy="290" r="10"
+fill="url(#it)"
+onmousemove="show(event,'Italien','https://flagcdn.com/w40/it.png')"
+onmouseleave="hide()"/>
+
+<!-- China -->
+<path class="active" fill="url(#cn)"
+d="M720,260 L840,260 L820,320 L740,320 Z"
+onmousemove="show(event,'China','https://flagcdn.com/w40/cn.png')"
+onmouseleave="hide()"/>
+
+</svg>
+
 <!-- FLAGGEN -->
+<svg width="0" height="0">
 <defs>
-
-<pattern id="nl" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/nl.png" width="200" height="100"/>
-</pattern>
-
-<pattern id="be" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/be.png"/>
+<pattern id="us" patternUnits="objectBoundingBox" width="1" height="1">
+<image href="https://flagcdn.com/w320/us.png" width="200"/>
 </pattern>
 
 <pattern id="fr" patternUnits="objectBoundingBox" width="1" height="1">
 <image href="https://flagcdn.com/w320/fr.png"/>
 </pattern>
 
-<pattern id="it" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/it.png"/>
-</pattern>
-
 <pattern id="es" patternUnits="objectBoundingBox" width="1" height="1">
 <image href="https://flagcdn.com/w320/es.png"/>
 </pattern>
 
-<pattern id="gb" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/gb.png"/>
-</pattern>
-
-<pattern id="hr" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/hr.png"/>
-</pattern>
-
-<pattern id="cz" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/cz.png"/>
-</pattern>
-
-<pattern id="lu" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/lu.png"/>
-</pattern>
-
-<pattern id="us" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/us.png"/>
-</pattern>
-
-<pattern id="ca" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/ca.png"/>
-</pattern>
-
-<pattern id="mx" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/mx.png"/>
+<pattern id="it" patternUnits="objectBoundingBox" width="1" height="1">
+<image href="https://flagcdn.com/w320/it.png"/>
 </pattern>
 
 <pattern id="cn" patternUnits="objectBoundingBox" width="1" height="1">
 <image href="https://flagcdn.com/w320/cn.png"/>
 </pattern>
-
-<pattern id="th" patternUnits="objectBoundingBox" width="1" height="1">
-<image href="https://flagcdn.com/w320/th.png"/>
-</pattern>
-
 </defs>
-
-<!-- EUROPA (vereinfacht aber realistisch geformt) -->
-
-<!-- Frankreich -->
-<path class="country" fill="url(#fr)"
-d="M450,250 L500,240 L520,280 L490,310 L440,290 Z"
-onmousemove="showTooltip(event,'Frankreich','https://flagcdn.com/w40/fr.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- Spanien -->
-<path class="country" fill="url(#es)"
-d="M430,310 L490,310 L470,350 L420,340 Z"
-onmousemove="showTooltip(event,'Spanien','https://flagcdn.com/w40/es.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- Italien -->
-<path class="country" fill="url(#it)"
-d="M520,300 L550,330 L530,370 L500,340 Z"
-onmousemove="showTooltip(event,'Italien','https://flagcdn.com/w40/it.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- Niederlande -->
-<path class="country" fill="url(#nl)"
-d="M480,230 L495,230 L495,250 L480,250 Z"
-onmousemove="showTooltip(event,'Niederlande','https://flagcdn.com/w40/nl.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- Belgien -->
-<path class="country" fill="url(#be)"
-d="M470,240 L485,240 L485,260 L470,260 Z"
-onmousemove="showTooltip(event,'Belgien','https://flagcdn.com/w40/be.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- England -->
-<path class="country" fill="url(#gb)"
-d="M450,200 L480,200 L470,230 L440,220 Z"
-onmousemove="showTooltip(event,'England','https://flagcdn.com/w40/gb.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- USA -->
-<path class="country" fill="url(#us)"
-d="M120,260 L260,250 L280,320 L150,330 Z"
-onmousemove="showTooltip(event,'USA','https://flagcdn.com/w40/us.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- Kanada -->
-<path class="country" fill="url(#ca)"
-d="M120,200 L280,200 L260,250 L120,250 Z"
-onmousemove="showTooltip(event,'Kanada','https://flagcdn.com/w40/ca.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- Mexiko -->
-<path class="country" fill="url(#mx)"
-d="M150,330 L260,320 L240,360 L160,360 Z"
-onmousemove="showTooltip(event,'Mexiko','https://flagcdn.com/w40/mx.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- China -->
-<path class="country" fill="url(#cn)"
-d="M700,260 L820,250 L840,310 L720,320 Z"
-onmousemove="showTooltip(event,'China','https://flagcdn.com/w40/cn.png')"
-onmouseleave="hideTooltip()"/>
-
-<!-- Thailand -->
-<path class="country" fill="url(#th)"
-d="M760,340 L790,350 L780,380 L750,370 Z"
-onmousemove="showTooltip(event,'Thailand','https://flagcdn.com/w40/th.png')"
-onmouseleave="hideTooltip()"/>
-
 </svg>
 
 <script>
 
-function showTooltip(e, name, flag){
+function show(e,name,flag){
   const t = document.getElementById("tooltip");
-  t.style.display = "block";
-  t.style.left = e.pageX + 10 + "px";
-  t.style.top = e.pageY + 10 + "px";
-  t.innerHTML = `<b>${name}</b><br><img src="${flag}">`;
+  t.style.display="block";
+  t.style.left = e.pageX+10+"px";
+  t.style.top = e.pageY+10+"px";
+  t.innerHTML = `<b>${name}</b><br><img src="${flag}" width="40">`;
 }
 
-function hideTooltip(){
-  document.getElementById("tooltip").style.display = "none";
+function hide(){
+  document.getElementById("tooltip").style.display="none";
 }
 
 </script>
