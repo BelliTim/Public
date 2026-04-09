@@ -1,1 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Welt</title>
 
+<style>
+body{
+  margin:0;
+  background:#0b0f19;
+  font-family:system-ui;
+  color:white;
+  text-align:center;
+}
+
+h1{
+  margin:20px;
+}
+
+.map-container{
+  max-width:1200px;
+  margin:auto;
+}
+
+/* Länder Standard */
+svg path{
+  fill:#1f2937;
+  stroke:#1e3a5f;
+  stroke-width:0.5;
+  transition:0.2s;
+}
+
+/* Hover */
+svg path:hover{
+  fill:#3b82f6;
+  cursor:pointer;
+}
+
+/* Tooltip */
+#tooltip{
+  position:absolute;
+  background:#111;
+  padding:10px;
+  border-radius:10px;
+  display:none;
+  pointer-events:none;
+  font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Welt</h1>
+
+<div class="map-container">
+  <object id="map" type="image/svg+xml" data="custom.geo.svg"></object>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+const tooltip = document.getElementById("tooltip");
+
+document.getElementById("map").addEventListener("load", () => {
+
+  const svgDoc = document.getElementById("map").contentDocument;
+  const paths = svgDoc.querySelectorAll("path");
+
+  paths.forEach(p => {
+
+    p.addEventListener("mousemove", (e)=>{
+      tooltip.style.display="block";
+      tooltip.style.left = e.pageX + 10 + "px";
+      tooltip.style.top = e.pageY + 10 + "px";
+      tooltip.innerHTML = p.id || "Land";
+    });
+
+    p.addEventListener("mouseleave", ()=>{
+      tooltip.style.display="none";
+    });
+
+  });
+
+});
+</script>
+
+</body>
+</html>
