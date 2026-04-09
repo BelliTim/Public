@@ -1,0 +1,29 @@
+backend:
+  name: github
+  repo: DEINUSERNAME/DEINREPO
+
+media_folder: "images"
+public_folder: "/images"
+
+collections:
+
+  - name: "garage"
+    label: "Garage"
+    folder: "garage"
+    create: true
+
+    fields:
+      - { label: "Auto", name: "title", widget: "string" }
+      - { label: "Beschreibung", name: "description", widget: "text" }
+      - { label: "Bild", name: "image", widget: "image" }
+
+  - name: "trikots"
+    label: "Trikots"
+    folder: "trikots"
+    create: true
+
+    fields:
+      - { label: "Team", name: "team", widget: "string" }
+      - { label: "Spieler", name: "player", widget: "string" }
+      - { label: "Saison", name: "season", widget: "string" }
+      - { label: "Bild", name: "image", widget: "image" }
