@@ -17,14 +17,28 @@ svg{
   max-width:1200px;
 }
 
+/* Länder */
 path{
   fill:#1f2937;
   stroke:#1e3a5f;
+  stroke-width:0.5;
   transition:0.2s;
 }
 
+/* Hover */
 path:hover{
   fill:#3b82f6;
+  cursor:pointer;
+}
+
+/* Tooltip */
+#tooltip{
+  position:absolute;
+  background:#111;
+  padding:8px;
+  border-radius:8px;
+  display:none;
+  font-size:14px;
 }
 </style>
 </head>
@@ -34,15 +48,21 @@ path:hover{
 <h1>Welt</h1>
 
 <svg id="map"></svg>
+<div id="tooltip"></div>
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
 
 <script>
+const tooltip = document.getElementById("tooltip");
+
 d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
 .then(function(data){
 
   const svg = d3.select("#map");
-  const projection = d3.geoNaturalEarth1().scale(180).translate([500,250]);
+  const projection = d3.geoNaturalEarth1()
+    .scale(180)
+    .translate([500,250]);
+
   const path = d3.geoPath().projection(projection);
 
   svg.selectAll("path")
@@ -50,7 +70,16 @@ d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/w
     .enter()
     .append("path")
     .attr("d", path)
-    .attr("id", d => d.id)
+    .on("mousemove", function(event, d){
+      tooltip.style.display="block";
+      tooltip.style.left = event.pageX + 10 + "px";
+      tooltip.style.top = event.pageY + 10 + "px";
+      tooltip.innerHTML = d.properties.name;
+    })
+    .on("mouseleave", function(){
+      tooltip.style.display="none";
+    });
+
 });
 </script>
 
