@@ -97,13 +97,15 @@ fetch("Welt.svg")
 .then(data => {
     document.getElementById("map-container").innerHTML = data;
 
-    const countries = document.querySelectorAll("path");
+ country.addEventListener("click", () => {
+    const name = country.getAttribute("name") 
+              || country.getAttribute("data-name") 
+              || country.getAttribute("title") 
+              || country.id;
 
-    countries.forEach(country => {
-        country.addEventListener("click", () => {
-            alert("Land: " + country.id);
-        });
-    });
+    alert("Land: " + name);
+});
+
 
     // 👉 HIER DEINE LÄNDER EINTRAGEN
     const visited = ["DEU", "USA", "CHN"]; // Beispiel
