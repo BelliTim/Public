@@ -214,6 +214,60 @@ border-radius:12px;
 margin-top:20px;
 }
 
+/* MOBILE OPTIMIERUNG */
+
+@media (max-width: 900px){
+
+.section{
+padding:60px 8%;
+}
+
+.hero h1{
+font-size:38px;
+}
+
+.hero p{
+font-size:16px;
+}
+
+nav{
+padding:15px 20px;
+}
+
+nav a{
+margin:0 10px;
+font-size:14px;
+}
+
+/* Garage Layout */
+
+.garage-container{
+grid-template-columns:1fr;
+gap:25px;
+}
+
+/* Slider */
+
+.slider-garage{
+max-width:100%;
+height:350px;
+}
+
+/* Buttons */
+
+.prev,.next{
+font-size:18px;
+padding:8px 10px;
+}
+
+/* Auto Infos */
+
+.car-info{
+font-size:15px;
+}
+
+}
+  
 /* Smooth scroll */
 
 html{
@@ -301,7 +355,7 @@ scroll-behavior:smooth;
 
 <div class="slider-garage">
 
-<button class="prev" onclick="changeSlide(-1)">❮</button>
+<button class="prev">❯</button>
 
 <img class="slide active" src="/images/IMG_4824.jpeg">
 <img class="slide" src="/images/IMG_4825.jpeg">
@@ -309,7 +363,7 @@ scroll-behavior:smooth;
 <img class="slide" src="/images/IMG_4829.jpeg">
 <img class="slide" src="/images/IMG_4831.jpeg">
 
-<button class="next" onclick="changeSlide(1)">❯</button>
+<button class="next">❯</button>
 
 </div>
 
@@ -327,29 +381,43 @@ scroll-behavior:smooth;
 
 <script>
 
-let slideIndex = 0;
-const slides = document.querySelectorAll(".slide");
+document.querySelectorAll(".slider-garage").forEach(slider => {
 
-function showSlide(index){
+let slides = slider.querySelectorAll(".slide");
+let index = 0;
+
+function showSlide(i){
+
 slides.forEach(s => s.classList.remove("active"));
-slides[index].classList.add("active");
-}
-
-function changeSlide(n){
-
-slideIndex += n;
-
-if(slideIndex >= slides.length){
-slideIndex = 0;
-}
-
-if(slideIndex < 0){
-slideIndex = slides.length-1;
-}
-
-showSlide(slideIndex);
+slides[i].classList.add("active");
 
 }
+
+slider.querySelector(".next").onclick = () => {
+
+index++;
+
+if(index >= slides.length){
+index = 0;
+}
+
+showSlide(index);
+
+};
+
+slider.querySelector(".prev").onclick = () => {
+
+index--;
+
+if(index < 0){
+index = slides.length - 1;
+}
+
+showSlide(index);
+
+};
+
+});
 
 function addEntry(){
 
