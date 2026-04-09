@@ -9,19 +9,27 @@
 
 <style>
 
-.slider{
-position:relative;
-max-width:600px;
-margin:auto;
-}
+/* GARAGE SLIDER */
 
-.slide{
+.slider-garage{
+position:relative;
 width:100%;
-display:none;
+max-width:700px;
+height:420px;
+margin:auto;
+overflow:hidden;
 border-radius:10px;
 }
 
-.slide.active{
+.slider-garage .slide{
+position:absolute;
+width:100%;
+height:100%;
+object-fit:cover;
+display:none;
+}
+
+.slider-garage .slide.active{
 display:block;
 }
 
@@ -137,73 +145,73 @@ opacity:0.8;
 }
 
 body{
-    margin:0;
-    font-family:'Poppins', sans-serif;
-    background:#0f172a;
-    color:white;
+margin:0;
+font-family:'Poppins', sans-serif;
+background:#0f172a;
+color:white;
 }
 
 /* NAVBAR */
 
 nav{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:20px 40px;
-    background:#020617;
-    position:sticky;
-    top:0;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 40px;
+background:#020617;
+position:sticky;
+top:0;
 }
 
 nav a{
-    color:white;
-    text-decoration:none;
-    font-weight:500;
-    margin:0 20px;
-    transition:0.3s;
+color:white;
+text-decoration:none;
+font-weight:500;
+margin:0 20px;
+transition:0.3s;
 }
 
 nav a:hover{
-    color:#38bdf8;
+color:#38bdf8;
 }
 
 /* HERO */
 
 .hero{
-    height:90vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    flex-direction:column;
-    text-align:center;
+height:90vh;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+text-align:center;
 }
 
 .hero h1{
-    font-size:60px;
-    margin-bottom:10px;
+font-size:60px;
+margin-bottom:10px;
 }
 
 .hero p{
-    font-size:20px;
-    opacity:0.7;
+font-size:20px;
+opacity:0.7;
 }
 
 /* SECTIONS */
 
 .section{
-    padding:100px 20%;
+padding:100px 20%;
 }
 
 .section h2{
-    font-size:40px;
-    margin-bottom:20px;
+font-size:40px;
+margin-bottom:20px;
 }
 
 .card{
-    background:#020617;
-    padding:30px;
-    border-radius:12px;
-    margin-top:20px;
+background:#020617;
+padding:30px;
+border-radius:12px;
+margin-top:20px;
 }
 
 /* Smooth scroll */
@@ -259,7 +267,6 @@ scroll-behavior:smooth;
 
 </section>
 
-
 <section class="section" id="lebenslauf">
 
 <h2>Lebenslauf</h2>
@@ -269,9 +276,6 @@ scroll-behavior:smooth;
 </div>
 
 </section>
-
-
-
 
 <section class="section" id="garage">
 
@@ -285,21 +289,7 @@ scroll-behavior:smooth;
 
 <div id="garageAktuell"></div>
 
-<h2>Opel Astra H TwinTop 2007</h2>
-
-<div class="slide-container">
-  <img src="images/3810A7EE-8AF0-4493-85D6-609DF31E4CC1.jpeg">
-  <img src="images/IMG_0A92D3A5-A6C8-45A8-9BF3-4A07D046E8AE.jpeg">
-  <img src="images/IMG_4519.jpeg">
 </div>
-
-<p>
-Motor: 1.8<br>
-PS: 140<br>
-</p>
-    
-</div>
-
 
 <div class="garage-column">
 
@@ -309,7 +299,7 @@ PS: 140<br>
 
 <h3>Opel Corsa C</h3>
 
-<div class="slider">
+<div class="slider-garage">
 
 <button class="prev" onclick="changeSlide(-1)">❮</button>
 
@@ -332,9 +322,6 @@ PS: 140<br>
 </div>
 
 </div>
-
-
-
 
 </section>
 
@@ -416,7 +403,7 @@ function checkPassword(){
 
 const password = document.getElementById("passwordInput").value;
 
-const correctPassword = "astra"; // HIER Passwort ändern
+const correctPassword = "astra";
 
 if(password === correctPassword){
 
@@ -433,3 +420,4 @@ document.getElementById("error").innerText = "Falsches Passwort";
 </script>
 
 </body>
+</html>
