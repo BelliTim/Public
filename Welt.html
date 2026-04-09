@@ -2,43 +2,49 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Welt</title>
 
 <style>
-body{
-  margin:0;
-  background:#0b0f19;
-  color:white;
-  text-align:center;
+body {
+  margin: 0;
+  background: #070f1a;
+  font-family: Arial;
+  color: white;
+  text-align: center;
 }
 
-svg{
-  width:100%;
-  max-width:1200px;
+h1 {
+  margin: 20px 0;
 }
 
-/* Länder */
-path{
-  fill:#1f2937;
-  stroke:#1e3a5f;
-  stroke-width:0.5;
-  transition:0.2s;
+#map {
+  width: 100%;
+  max-width: 1000px;
+  margin: auto;
 }
 
-/* Hover */
-path:hover{
-  fill:#3b82f6;
-  cursor:pointer;
+svg path {
+  fill: #0f1c2e;
+  stroke: #2f4f6f;
+  transition: 0.2s;
 }
 
-/* Tooltip */
-#tooltip{
-  position:absolute;
-  background:#111;
-  padding:8px;
-  border-radius:8px;
-  display:none;
-  font-size:14px;
+svg path.active {
+  fill: #3a7bd5;
+  filter: drop-shadow(0 0 6px #3a7bd5);
+}
+
+#tooltip {
+  position: fixed;
+  background: rgba(10,20,40,0.95);
+  padding: 10px;
+  border-radius: 10px;
+  display: none;
+}
+#tooltip img {
+  width: 40px;
+  margin-top: 5px;
 }
 </style>
 </head>
@@ -46,41 +52,82 @@ path:hover{
 <body>
 
 <h1>Welt</h1>
-
-<svg id="map"></svg>
+<div id="map"></div>
 <div id="tooltip"></div>
 
-<script src="https://d3js.org/d3.v7.min.js"></script>
-
 <script>
-const tooltip = document.getElementById("tooltip");
-
-d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
-.then(function(data){
-
-  const svg = d3.select("#map");
-  const projection = d3.geoNaturalEarth1()
-    .scale(180)
-    .translate([500,250]);
-
-  const path = d3.geoPath().projection(projection);
-
-  svg.selectAll("path")
-    .data(data.features)
-    .enter()
-    .append("path")
-    .attr("d", path)
-    .on("mousemove", function(event, d){
-      tooltip.style.display="block";
-      tooltip.style.left = event.pageX + 10 + "px";
-      tooltip.style.top = event.pageY + 10 + "px";
-      tooltip.innerHTML = d.properties.name;
-    })
-    .on("mouseleave", function(){
-      tooltip.style.display="none";
-    });
-
+fetch("custom.geo.svg")
+.then(r => r.text())
+.then(svg => {
+  document.getElementById("map").innerHTML = svg;
+  init();
 });
+
+function init() {
+  const paths = document.querySelectorAll("svg path");
+  const tooltip = document.getElementById("tooltip");
+
+  // Position-basiertes Mapping (wird ggf. angepasst!)
+  const specialCountries = [
+    {name:"USA", flag:"https://flagcdn.com/w40/us.png", x:[0,400], y:[100,300]},
+    {name:"Kanada", flag:"https://flagcdn.com/w40/ca.png", x:[0,400], y:[0,120]},
+    {name:"Mexiko", flag:"https://flagcdn.com/w40/mx.png", x:[200,400], y:[300,450]},
+    {name:"Spanien", flag:"https://flagcdn.com/w40/es.png", x:[500,650], y:[250,350]},
+    {name:"Frankreich", flag:"https://flagcdn.com/w40/fr.png", x:[550,700], y:[200,300]},
+    {name:"Deutschland", flag:"https://flagcdn.com/w40/de.png", x:[600,750], y:[150,250]},
+    {name:"Italien", flag:"https://flagcdn.com/w40/it.png", x:[650,800], y:[250,400]},
+    {name:"China", flag:"https://flagcdn.com/w40/cn.png", x:[900,1200], y:[150,350]},
+    {name:"Thailand", flag:"https://flagcdn.com/w40/th.png", x:[1000,1200], y:[300,450]}
+  ];
+
+  paths.forEach(p => {
+
+    function getCountry(x,y){
+      for (let c of specialCountries){
+        if(x>c.x[0] && x<c.x[1] && y>c.y[0] && y<c.y[1]){
+          return c;
+        }
+      }
+      return null;
+    }
+
+    function show(e){
+      const box = p.getBBox();
+      const cx = box.x + box.width/2;
+      const cy = box.y + box.height/2;
+
+      const country = getCountry(cx,cy);
+
+      p.classList.add("active");
+
+      if(country){
+        tooltip.innerHTML = country.name + `<br><img src="${country.flag}">`;
+      } else {
+        tooltip.innerHTML = "Land";
+      }
+
+      tooltip.style.display = "block";
+    }
+
+    function move(e){
+      tooltip.style.left = (e.touches ? e.touches[0].clientX : e.clientX)+10+"px";
+      tooltip.style.top = (e.touches ? e.touches[0].clientY : e.clientY)+10+"px";
+    }
+
+    function hide(){
+      p.classList.remove("active");
+      tooltip.style.display = "none";
+    }
+
+    p.addEventListener("mouseover", show);
+    p.addEventListener("mousemove", move);
+    p.addEventListener("mouseout", hide);
+
+    p.addEventListener("touchstart", show);
+    p.addEventListener("touchmove", move);
+    p.addEventListener("touchend", hide);
+  });
+}
 </script>
 
 </body>
