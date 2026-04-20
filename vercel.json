@@ -1,6 +1,8 @@
 {
   "routes": [
     { "handle": "filesystem" },
-    { "src": "/admin", "dest": "/admin/admin.html" }
+    { "src": "/admin", "dest": "/admin/admin.html" },
+    { "src": "/admin/", "dest": "/admin/admin.html" },
+    { "src": "/admin/admin.html", "dest": "/admin/admin.html" }
   ]
 }
