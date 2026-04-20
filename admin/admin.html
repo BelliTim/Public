@@ -81,6 +81,18 @@ button {
     <p id="status"></p>
 </div>
 
+<h2>Inhalte verwalten</h2>
+
+<select id="viewCategory" onchange="loadEntries()">
+    <option value="trikots">Trikots</option>
+    <option value="spiele">Spiele</option>
+    <option value="garageAktuell">Garage Aktuell</option>
+    <option value="garageAlt">Garage Alt</option>
+</select>
+
+<div id="entries"></div>
+
+    
 <script>
 
 let PASSWORD = "";
@@ -144,6 +156,74 @@ async function upload(){
     reader.readAsDataURL(file);
 }
 
+/* 📦 EINTRÄGE LADEN */
+async function loadEntries(){
+
+    const type = document.getElementById("viewCategory").value;
+
+    const res = await fetch(`/content/${type}.json`);
+    const data = await res.json();
+
+    const container = document.getElementById("entries");
+
+    container.innerHTML = data.map((item, index) => `
+        <div style="margin:20px; padding:15px; border:1px solid #555; border-radius:10px;">
+            
+            ${item.image ? `<img src="${item.image}" style="max-width:200px;"><br>` : ""}
+
+            <input value="${item.title}" id="title-${index}">
+            <textarea id="comment-${index}">${item.comment}</textarea>
+
+            <br>
+            <button onclick="saveEdit('${type}', ${index})">💾 Speichern</button>
+            <button onclick="deleteEntry('${type}', ${index})">❌ Löschen</button>
+        </div>
+    `).join("");
+}
+
+async function saveEdit(type, index){
+
+    const title = document.getElementById(`title-${index}`).value;
+    const comment = document.getElementById(`comment-${index}`).value;
+
+    const res = await fetch("/api/edit", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+            type,
+            index,
+            title,
+            comment,
+            password: PASSWORD
+        })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    loadEntries();
+}
+
+ async function deleteEntry(type, index){
+
+    if(!confirm("Wirklich löschen?")) return;
+
+    const res = await fetch("/api/delete", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+            type,
+            index,
+            password: PASSWORD
+        })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    loadEntries();
+}   
+    
 </script>
 
 </body>
