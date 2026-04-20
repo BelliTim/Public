@@ -10,54 +10,69 @@ body {
     background: #0f172a;
     color: white;
     text-align: center;
+    margin:0;
 }
 
-.container {
-    margin-top: 80px;
+#loginOverlay {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:#020617;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
 }
 
 input, textarea, select {
-    width: 80%;
-    max-width: 400px;
-    margin: 10px;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
+    width:80%;
+    max-width:400px;
+    margin:10px;
+    padding:12px;
+    border-radius:8px;
+    border:none;
 }
 
 button {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    background: #3b82f6;
-    color: white;
-    cursor: pointer;
+    padding:12px 20px;
+    border:none;
+    border-radius:8px;
+    background:#3b82f6;
+    color:white;
+    cursor:pointer;
 }
 
-button:hover {
-    background: #2563eb;
+.container {
+    margin-top:80px;
 }
 </style>
 
 </head>
 <body>
 
-<div class="container">
+<!-- LOGIN -->
+<div id="loginOverlay">
+    <h2>Admin Login</h2>
+    <input type="password" id="passwordInput" placeholder="Passwort">
+    <button onclick="login()">Login</button>
+    <p id="error" style="color:red;"></p>
+</div>
+
+<!-- ADMIN -->
+<div class="container" id="adminPanel" style="display:none;">
     <h1>Admin Upload</h1>
 
-    <!-- Kategorie -->
     <select id="category">
         <option value="trikots">Trikots</option>
         <option value="spiele">Spiele</option>
+        <option value="garageAktuell">Garage Aktuell</option>
+        <option value="garageAlt">Garage Alt</option>
     </select>
 
-    <!-- Titel -->
     <input type="text" id="title" placeholder="Titel">
-
-    <!-- Kommentar -->
     <textarea id="comment" placeholder="Kommentar"></textarea>
-
-    <!-- Bild -->
     <input type="file" id="file">
 
     <br>
@@ -67,39 +82,68 @@ button:hover {
 </div>
 
 <script>
-async function upload() {
+
+let PASSWORD = "";
+
+/* LOGIN über Backend */
+async function login(){
+
+    const pw = document.getElementById("passwordInput").value;
+
+    const res = await fetch("/api/login", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ password: pw })
+    });
+
+    if(res.status === 200){
+        PASSWORD = pw;
+
+        document.getElementById("loginOverlay").style.display = "none";
+        document.getElementById("adminPanel").style.display = "block";
+    } else {
+        document.getElementById("error").innerText = "Falsches Passwort";
+    }
+}
+
+
+/* UPLOAD */
+async function upload(){
+
     const file = document.getElementById("file").files[0];
     const title = document.getElementById("title").value;
     const comment = document.getElementById("comment").value;
     const category = document.getElementById("category").value;
 
-    if (!file || !title) {
+    if(!file || !title){
         alert("Titel und Bild erforderlich!");
         return;
     }
 
     const reader = new FileReader();
-    reader.readAsDataURL(file);
 
     reader.onload = async () => {
+
         const res = await fetch("/api/upload", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            method:"POST",
+            headers:{ "Content-Type":"application/json" },
             body: JSON.stringify({
                 file: reader.result,
                 fileName: file.name,
-                category: category,
-                title: title,
-                comment: comment
+                category,
+                title,
+                comment,
+                password: PASSWORD
             })
         });
 
         const data = await res.json();
         document.getElementById("status").innerText = data.message;
     };
+
+    reader.readAsDataURL(file);
 }
+
 </script>
 
 </body>
