@@ -10,6 +10,7 @@ export default async function handler(req, res) {
         const file = formData.get("file");
         const password = formData.get("password");
 
+        // 🔐 Passwort prüfen
         if (password !== process.env.ADMIN_PASSWORD) {
             return res.status(401).json({ error: "Falsches Passwort" });
         }
@@ -18,12 +19,15 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: "Keine Datei" });
         }
 
+        // 📦 Datei lesen
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
+        // 🧠 eindeutiger Name
         const fileName = `img_${Date.now()}_${Math.random().toString(36).substring(2,8)}.jpg`;
         const path = `content/images/${fileName}`;
 
+        // 🚀 GitHub Upload
         const uploadRes = await fetch(`https://api.github.com/repos/BelliTim/Public/contents/${path}`, {
             method: "PUT",
             headers: {
@@ -51,7 +55,7 @@ export default async function handler(req, res) {
         });
 
     } catch (err) {
-        console.error(err);
+        console.error("SERVER ERROR:", err);
         return res.status(500).json({
             error: err.message
         });
