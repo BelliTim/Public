@@ -243,8 +243,9 @@ grid-template-columns:1fr;
 gap:25px;
 }
 
+/* 🔥 WICHTIG: NICHT mehr überschreiben */
 .slider-garage{
-height:300px;
+height:clamp(220px, 55dvh, 350px);
 }
 
 }
