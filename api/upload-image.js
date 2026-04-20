@@ -1,7 +1,11 @@
-export default async function handler(req, res) {
+export const config = {
+    runtime: "edge"
+};
+
+export default async function handler(req) {
 
     if (req.method !== "POST") {
-        return res.status(405).json({ error: "Nur POST erlaubt" });
+        return new Response(JSON.stringify({ error: "Nur POST erlaubt" }), { status: 405 });
     }
 
     try {
@@ -11,11 +15,11 @@ export default async function handler(req, res) {
         const password = formData.get("password");
 
         if (password !== process.env.ADMIN_PASSWORD) {
-            return res.status(401).json({ error: "Falsches Passwort" });
+            return new Response(JSON.stringify({ error: "Falsches Passwort" }), { status: 401 });
         }
 
         if (!file) {
-            return res.status(400).json({ error: "Keine Datei" });
+            return new Response(JSON.stringify({ error: "Keine Datei" }), { status: 400 });
         }
 
         const bytes = await file.arrayBuffer();
@@ -39,15 +43,15 @@ export default async function handler(req, res) {
         const data = await uploadRes.json();
 
         if (!uploadRes.ok) {
-            return res.status(500).json({ error: data.message });
+            return new Response(JSON.stringify({ error: data.message }), { status: 500 });
         }
 
-        return res.status(200).json({
+        return new Response(JSON.stringify({
             url: `/content/images/${fileName}`
-        });
+        }), { status: 200 });
 
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: err.message });
+        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }
 }
