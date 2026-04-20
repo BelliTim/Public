@@ -1,9 +1,3 @@
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
 export default async function handler(req, res) {
 
     if (req.method !== "POST") {
@@ -45,13 +39,8 @@ export default async function handler(req, res) {
         const data = await uploadRes.json();
 
         if (!uploadRes.ok) {
-    console.log("GITHUB ERROR:", data);
-
-    return res.status(500).json({
-        error: data.message,
-        details: data
-    });
-}
+            return res.status(500).json({ error: data.message });
+        }
 
         return res.status(200).json({
             url: `/content/images/${fileName}`
@@ -59,6 +48,6 @@ export default async function handler(req, res) {
 
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ error: "Serverfehler" });
+        return res.status(500).json({ error: err.message });
     }
 }
