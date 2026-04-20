@@ -25,7 +25,7 @@ export default async function handler(req) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const fileName = `img_${Date.now()}.jpg`;
+        const fileName = `img_${Date.now()}_${Math.random().toString(36).substring(2,8)}.jpg`;
         const path = `content/images/${fileName}`;
 
         const uploadRes = await fetch(`https://api.github.com/repos/BelliTim/Public/contents/${path}`, {
