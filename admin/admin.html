@@ -209,32 +209,41 @@ async function upload(){
 
     for(let file of files){
 
+    file = await compressImage(file); // 🔥 DAS IST DER FIX
+
+    if(images.length >= 10) break;
+
+    const base64 = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsDataURL(file);
+    });
+
+    images.push(base64);
+}
+
         if(images.length >= 10) break;
 
-        // 🔥 FIX: kleine Pause gegen GitHub Block
         await new Promise(r => setTimeout(r, 300));
 
+        // 🔥 BILD KOMPRIMIEREN
+        const compressed = await compressImage(file);
+
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", compressed);
         formData.append("password", PASSWORD);
 
-        try {
-            const uploadRes = await fetch("/api/upload-image", {
-                method:"POST",
-                body: formData
-            });
+        const uploadRes = await fetch("/api/upload-image", {
+            method:"POST",
+            body: formData
+        });
 
-            const data = await uploadRes.json();
+        const data = await uploadRes.json();
 
-            if(data.url){
-                images.push(data.url);
-            } else {
-                alert("Fehler beim Bild-Upload");
-                return;
-            }
-
-        } catch (err) {
-            alert("Upload Fehler: " + err.message);
+        if(data.url){
+            images.push(data.url);
+        } else {
+            alert("Fehler beim Bild-Upload:\n" + (data.error || data.message));
             return;
         }
     }
@@ -256,7 +265,38 @@ async function upload(){
 
     loadEntries();
 }
+async function compressImage(file){
+    return new Promise(resolve => {
 
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = e => {
+            img.src = e.target.result;
+        };
+
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+
+            const maxWidth = 1200;
+            const scale = maxWidth / img.width;
+
+            canvas.width = maxWidth;
+            canvas.height = img.height * scale;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob(blob => {
+                resolve(new File([blob], file.name, {
+                    type: "image/jpeg"
+                }));
+            }, "image/jpeg", 0.7);
+        };
+
+        reader.readAsDataURL(file);
+    });
+}   
 /* SLIDER */
 function initSlider(container){
     let index = 0;
