@@ -6,12 +6,10 @@ export default async function handler(req, res) {
 
     const { type, index, password } = req.body;
 
-    // 🔐 Passwort prüfen
     if (password !== process.env.ADMIN_PASSWORD) {
-        return res.status(401).json({ message: "Kein Zugriff" });
+        return res.status(401).json({ message: "Falsches Passwort" });
     }
 
-    // 📁 erlaubte Kategorien
     const fileMap = {
         trikots: "trikots.json",
         spiele: "spiele.json",
@@ -20,49 +18,71 @@ export default async function handler(req, res) {
     };
 
     const fileName = fileMap[type];
-
-    if (!fileName) {
-        return res.status(400).json({ message: "Ungültige Kategorie" });
-    }
+    const path = `content/${fileName}`;
 
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    const REPO = process.env.GITHUB_REPO;
-
-    const path = `content/${fileName}`;
+    const REPO = "BelliTim/Public";
 
     try {
 
-        // 📥 Datei laden
-        const fileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+        // 📥 JSON laden
+        const getRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
             headers: {
                 Authorization: `Bearer ${GITHUB_TOKEN}`
             }
         });
 
-        if (fileRes.status !== 200) {
-            return res.status(500).json({ message: "Datei nicht gefunden" });
-        }
+        const fileData = await getRes.json();
+        const sha = fileData.sha;
 
-        const fileData = await fileRes.json();
-
-        const content = JSON.parse(
+        let data = JSON.parse(
             Buffer.from(fileData.content, "base64").toString()
         );
 
-        // 🧠 Sicherheit
-        if (!Array.isArray(content) || !content[index]) {
-            return res.status(400).json({ message: "Eintrag nicht gefunden" });
+        const entry = data[index];
+
+        // 🔥 BILDER LÖSCHEN
+        for (let img of entry.images) {
+
+            // 👉 URL in GitHub Pfad umwandeln
+            const imagePath = img.replace(
+                "https://cdn.jsdelivr.net/gh/BelliTim/Public@main/",
+                ""
+            );
+
+            // 📥 SHA holen
+            const imgRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
+                headers: {
+                    Authorization: `Bearer ${GITHUB_TOKEN}`
+                }
+            });
+
+            if (imgRes.status !== 200) continue;
+
+            const imgData = await imgRes.json();
+
+            // ❌ löschen
+            await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${GITHUB_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Bild gelöscht",
+                    sha: imgData.sha
+                })
+            });
         }
 
-        // ❌ löschen
-        content.splice(index, 1);
+        // 🗑️ Eintrag entfernen
+        data.splice(index, 1);
 
         const updated = Buffer.from(
-            JSON.stringify(content, null, 2)
+            JSON.stringify(data, null, 2)
         ).toString("base64");
 
-        // 📤 speichern
-        const updateRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+        await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${GITHUB_TOKEN}`,
@@ -71,15 +91,11 @@ export default async function handler(req, res) {
             body: JSON.stringify({
                 message: "Eintrag gelöscht",
                 content: updated,
-                sha: fileData.sha
+                sha
             })
         });
 
-        if (updateRes.status !== 200 && updateRes.status !== 201) {
-            return res.status(500).json({ message: "Fehler beim Speichern" });
-        }
-
-        return res.status(200).json({ message: "Gelöscht 🗑️" });
+        return res.status(200).json({ message: "Gelöscht ✅" });
 
     } catch (err) {
         console.error(err);
