@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   }
 
   const response = await fetch(
-    `https://api.github.com/repos/BelliTim/BelliTim_REPO/contents/images/${filename}`,
+    `https://api.github.com/repos/BelliTim/Public_REPO/contents/images/${filename}`,
     {
       method: "PUT",
       headers: {
