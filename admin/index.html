@@ -1,11 +1,148 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-  <meta charset="utf-8" />
-  <title>Content Manager</title>
-  <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>
+<meta charset="UTF-8">
+<title>Admin</title>
+
+<style>
+body {
+  font-family: Arial;
+  background: #0f0f0f;
+  color: white;
+  text-align: center;
+}
+
+.container {
+  margin-top: 80px;
+}
+
+input, select, button {
+  padding: 10px;
+  margin: 10px;
+  border-radius: 8px;
+  border: none;
+}
+
+button {
+  background: #00bcd4;
+  color: black;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #0097a7;
+}
+
+#preview {
+  max-width: 200px;
+  margin-top: 20px;
+  border-radius: 10px;
+}
+</style>
 </head>
+
 <body>
+
+<div class="container" id="loginBox">
+  <h2>🔒 Admin Login</h2>
+  <input type="password" id="pw" placeholder="Passwort">
+  <br>
+  <button onclick="login()">Login</button>
+</div>
+
+<div class="container" id="panel" style="display:none;">
+  <h2>⚙️ Admin Panel</h2>
+
+  <select id="type">
+    <option value="trikots">Trikots</option>
+    <option value="spiele">Spiele</option>
+  </select>
+  <br>
+
+  <input type="file" id="file" accept="image/*"><br>
+
+  <img id="preview" style="display:none;" />
+
+  <br>
+  <button onclick="upload()">📤 Hochladen</button>
+  <br><br>
+
+  <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+const STORAGE_KEY = "admin_login";
+
+// Auto Login
+if (localStorage.getItem(STORAGE_KEY)) {
+  showPanel();
+}
+
+function login() {
+  const pw = document.getElementById("pw").value;
+
+  if (!pw) {
+    alert("Passwort fehlt");
+    return;
+  }
+
+  localStorage.setItem(STORAGE_KEY, pw);
+  showPanel();
+}
+
+function logout() {
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+function showPanel() {
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("panel").style.display = "block";
+}
+
+// Vorschau
+document.getElementById("file").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  const preview = document.getElementById("preview");
+
+  if (file) {
+    preview.src = URL.createObjectURL(file);
+    preview.style.display = "block";
+  }
+});
+
+// Upload
+async function upload() {
+  const file = document.getElementById("file").files[0];
+  const type = document.getElementById("type").value;
+  const pw = localStorage.getItem(STORAGE_KEY);
+
+  if (!file) {
+    alert("Keine Datei gewählt");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async function() {
+    const base64 = reader.result.split(",")[1];
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        password: pw,
+        filename: type + "/" + file.name,
+        content: base64
+      })
+    });
+
+    alert(await res.text());
+  };
+
+  reader.readAsDataURL(file);
+}
+</script>
+
 </body>
 </html>
