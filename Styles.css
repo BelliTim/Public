@@ -174,9 +174,7 @@ border-radius:8px;
 .slider-garage{
 position:relative;
 width:100%;
-max-width:700px;
-height:420px;
-margin:auto;
+max-width:700px;height:clamp(250px, 60dvh, 420px);margin:auto;
 overflow:hidden;
 border-radius:10px;
 }
