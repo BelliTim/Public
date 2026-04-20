@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         message: "Upload via Website",
-        content: Buffer.from(content).toString("base64"),
+        content: content,
       }),
     }
   );
