@@ -1,0 +1,257 @@
+/* RESET */
+body{
+margin:0;
+font-family:'Poppins', sans-serif;
+background:#0f172a;
+color:white;
+}
+
+/* NAVBAR */
+nav{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 40px;
+background:#020617;
+position:sticky;
+top:0;
+}
+
+nav a{
+color:white;
+text-decoration:none;
+font-weight:500;
+margin:0 20px;
+transition:0.3s;
+}
+
+nav a:hover{
+color:#38bdf8;
+}
+
+/* HERO */
+.hero{
+height:90vh;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+text-align:center;
+}
+
+.hero h1{
+font-size:60px;
+margin-bottom:10px;
+}
+
+.hero p{
+font-size:20px;
+opacity:0.7;
+}
+
+/* SECTIONS */
+.section{
+padding:100px 20%;
+}
+
+.section h2{
+font-size:40px;
+margin-bottom:20px;
+}
+
+/* -------------------------
+   ⚽ TRIKOTS (GRID)
+------------------------- */
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
+gap:15px;
+padding:20px;
+}
+
+.grid img{
+width:100%;
+height:200px;
+object-fit:cover;
+border-radius:10px;
+transition:0.3s;
+}
+
+.grid img:hover{
+transform:scale(1.05);
+}
+
+/* -------------------------
+   📝 SPIELE (BLOG CARDS)
+------------------------- */
+.cards{
+display:flex;
+flex-direction:column;
+gap:25px;
+padding:20px;
+}
+
+.card{
+background:#020617;
+border-radius:12px;
+padding:20px;
+}
+
+/* Bild-Slider IN Card */
+.card-slider{
+position:relative;
+width:100%;
+height:220px;
+overflow:hidden;
+border-radius:10px;
+margin-bottom:10px;
+}
+
+.card-slider img{
+position:absolute;
+width:100%;
+height:100%;
+object-fit:cover;
+display:none;
+}
+
+.card-slider img.active{
+display:block;
+}
+
+.card-slider button{
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+background:rgba(0,0,0,0.6);
+color:white;
+border:none;
+padding:6px 10px;
+cursor:pointer;
+}
+
+.card-slider .prev{left:10px;}
+.card-slider .next{right:10px;}
+
+.card h3{
+margin:5px 0;
+}
+
+.card p{
+opacity:0.8;
+}
+
+/* -------------------------
+   🚗 GARAGE
+------------------------- */
+
+.garage-container{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:40px;
+}
+
+.garage-column{
+background:#020617;
+padding:20px;
+border-radius:12px;
+}
+
+.garage-entry{
+margin-top:20px;
+padding:20px;
+background:#0f172a;
+border-radius:10px;
+}
+
+.garage-entry img{
+width:100%;
+margin-top:10px;
+border-radius:8px;
+}
+
+/* GARAGE SLIDER */
+.slider-garage{
+position:relative;
+width:100%;
+max-width:700px;
+height:420px;
+margin:auto;
+overflow:hidden;
+border-radius:10px;
+}
+
+.slider-garage .slide{
+position:absolute;
+width:100%;
+height:100%;
+object-fit:cover;
+display:none;
+}
+
+.slider-garage .slide.active{
+display:block;
+}
+
+.prev,.next{
+position:absolute;
+top:50%;
+transform:translateY(-50%);
+background:rgba(0,0,0,0.6);
+color:white;
+border:none;
+font-size:22px;
+padding:10px;
+cursor:pointer;
+}
+
+.prev{left:10px;}
+.next{right:10px;}
+
+.car-info{
+text-align:center;
+margin-top:10px;
+opacity:0.8;
+}
+
+/* -------------------------
+   📱 MOBILE
+------------------------- */
+@media (max-width:900px){
+
+.section{
+padding:60px 8%;
+}
+
+.hero h1{
+font-size:38px;
+}
+
+.hero p{
+font-size:16px;
+}
+
+nav{
+padding:15px 20px;
+}
+
+nav a{
+margin:0 10px;
+font-size:14px;
+}
+
+.garage-container{
+grid-template-columns:1fr;
+gap:25px;
+}
+
+.slider-garage{
+height:300px;
+}
+
+}
+
+/* Smooth scroll */
+html{
+scroll-behavior:smooth;
+}
