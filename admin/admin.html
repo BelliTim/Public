@@ -227,7 +227,12 @@ async function upload(){
         if(data.url){
             images.push(data.url);
         } else {
-            alert("Fehler beim Bild-Upload:\n" + (data.error || data.message));
+            alert(
+  "Fehler beim Bild-Upload:\n" +
+  (data.error || data.message) +
+  "\n\nDETAILS:\n" +
+  JSON.stringify(data.details, null, 2)
+);
             return;
         }
     }
