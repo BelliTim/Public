@@ -26,6 +26,7 @@ body {
     flex-direction:column;
 }
 
+/* Inputs */
 input, textarea, select {
     width:80%;
     max-width:400px;
@@ -35,8 +36,10 @@ input, textarea, select {
     border:none;
 }
 
+/* Buttons */
 button {
-    padding:12px 20px;
+    padding:10px 15px;
+    margin:5px;
     border:none;
     border-radius:8px;
     background:#3b82f6;
@@ -45,7 +48,46 @@ button {
 }
 
 .container {
-    margin-top:80px;
+    margin-top:60px;
+}
+
+/* Slider */
+.slider {
+    position:relative;
+    width:200px;
+    height:150px;
+    margin:auto;
+    overflow:hidden;
+    border-radius:10px;
+}
+
+.slider img {
+    position:absolute;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:none;
+}
+
+.slider img.active {
+    display:block;
+}
+
+.slider button {
+    position:absolute;
+    top:50%;
+    transform:translateY(-50%);
+    background:rgba(0,0,0,0.6);
+}
+
+.slider .prev { left:5px; }
+.slider .next { right:5px; }
+
+.card {
+    border:1px solid #555;
+    padding:15px;
+    margin:20px;
+    border-radius:10px;
 }
 </style>
 
@@ -62,7 +104,8 @@ button {
 
 <!-- ADMIN -->
 <div class="container" id="adminPanel" style="display:none;">
-    <h1>Admin Upload</h1>
+
+    <h1>Upload</h1>
 
     <select id="category">
         <option value="trikots">Trikots</option>
@@ -73,31 +116,35 @@ button {
 
     <input type="text" id="title" placeholder="Titel">
     <textarea id="comment" placeholder="Kommentar"></textarea>
-    <input type="file" id="file">
+
+    <!-- 🔥 MULTI UPLOAD -->
+    <input type="file" id="file" multiple>
 
     <br>
     <button onclick="upload()">Hochladen</button>
 
     <p id="status"></p>
+
+    <hr>
+
+    <h2>Inhalte verwalten</h2>
+
+    <select id="viewCategory" onchange="loadEntries()">
+        <option value="trikots">Trikots</option>
+        <option value="spiele">Spiele</option>
+        <option value="garageAktuell">Garage Aktuell</option>
+        <option value="garageAlt">Garage Alt</option>
+    </select>
+
+    <div id="entries"></div>
+
 </div>
 
-<h2>Inhalte verwalten</h2>
-
-<select id="viewCategory" onchange="loadEntries()">
-    <option value="trikots">Trikots</option>
-    <option value="spiele">Spiele</option>
-    <option value="garageAktuell">Garage Aktuell</option>
-    <option value="garageAlt">Garage Alt</option>
-</select>
-
-<div id="entries"></div>
-
-    
 <script>
 
 let PASSWORD = "";
 
-/* LOGIN über Backend */
+/* LOGIN */
 async function login(){
 
     const pw = document.getElementById("passwordInput").value;
@@ -113,85 +160,46 @@ async function login(){
 
         document.getElementById("loginOverlay").style.display = "none";
         document.getElementById("adminPanel").style.display = "block";
+
+        loadEntries();
     } else {
         document.getElementById("error").innerText = "Falsches Passwort";
     }
 }
 
-
 /* UPLOAD */
 async function upload(){
 
-    const file = document.getElementById("file").files[0];
+    const files = document.getElementById("file").files;
     const title = document.getElementById("title").value;
     const comment = document.getElementById("comment").value;
     const category = document.getElementById("category").value;
 
-    if(!file || !title){
-        alert("Titel und Bild erforderlich!");
+    if(files.length === 0 || !title){
+        alert("Titel + Bild erforderlich");
         return;
     }
 
-    const reader = new FileReader();
+    let images = [];
 
-    reader.onload = async () => {
+    for(let file of files){
+        if(images.length >= 10) break;
 
-        const res = await fetch("/api/upload", {
-            method:"POST",
-            headers:{ "Content-Type":"application/json" },
-            body: JSON.stringify({
-                file: reader.result,
-                fileName: file.name,
-                category,
-                title,
-                comment,
-                password: PASSWORD
-            })
+        const base64 = await new Promise(resolve => {
+            const reader = new FileReader();
+            reader.onload = e => resolve(e.target.result);
+            reader.readAsDataURL(file);
         });
 
-        const data = await res.json();
-        document.getElementById("status").innerText = data.message;
-    };
+        images.push(base64);
+    }
 
-    reader.readAsDataURL(file);
-}
-
-/* 📦 EINTRÄGE LADEN */
-async function loadEntries(){
-
-    const type = document.getElementById("viewCategory").value;
-
-    const res = await fetch(`/content/${type}.json`);
-    const data = await res.json();
-
-    const container = document.getElementById("entries");
-
-    container.innerHTML = data.map((item, index) => `
-        <div style="margin:20px; padding:15px; border:1px solid #555; border-radius:10px;">
-            
-            ${item.image ? `<img src="${item.image}" style="max-width:200px;"><br>` : ""}
-
-            <input value="${item.title}" id="title-${index}">
-            <textarea id="comment-${index}">${item.comment}</textarea>
-
-            <br>
-            <button onclick="saveEdit('${type}', ${index})">💾 Speichern</button>
-            <button onclick="deleteEntry('${type}', ${index})">❌ Löschen</button>
-        </div>
-    `).join("");
-}
-
-async function saveEdit(type, index){
-
-    const title = document.getElementById(`title-${index}`).value;
-    const comment = document.getElementById(`comment-${index}`).value;
-
-    const res = await fetch("/api/edit", {
+    const res = await fetch("/api/upload", {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({
-            type,
-            index,
+            images,
+            category,
             title,
             comment,
             password: PASSWORD
@@ -204,9 +212,108 @@ async function saveEdit(type, index){
     loadEntries();
 }
 
- async function deleteEntry(type, index){
+/* SLIDER */
+function initSlider(container){
+    let index = 0;
+    const slides = container.querySelectorAll("img");
 
-    if(!confirm("Wirklich löschen?")) return;
+    function show(i){
+        slides.forEach(s => s.classList.remove("active"));
+        slides[i].classList.add("active");
+    }
+
+    container.querySelector(".next").onclick = () => {
+        index = (index + 1) % slides.length;
+        show(index);
+    };
+
+    container.querySelector(".prev").onclick = () => {
+        index = (index - 1 + slides.length) % slides.length;
+        show(index);
+    };
+}
+
+/* LOAD */
+async function loadEntries(){
+
+    const type = document.getElementById("viewCategory").value;
+
+    const res = await fetch(`/content/${type}.json`);
+    const data = await res.json();
+
+    const container = document.getElementById("entries");
+
+    container.innerHTML = data.map((item, i) => `
+        <div class="card">
+
+            <div class="slider" id="slider-${i}">
+                ${item.images.map((img, j)=>`
+                    <img src="${img}" class="${j===0?'active':''}">
+                `).join("")}
+
+                <button class="prev">❮</button>
+                <button class="next">❯</button>
+            </div>
+
+            <input value="${item.title}" id="title-${i}">
+            <textarea id="comment-${i}">${item.comment}</textarea>
+
+            <input type="file" id="file-${i}" multiple>
+
+            <br>
+            <button onclick="saveEdit('${type}', ${i})">💾 Speichern</button>
+            <button onclick="deleteEntry('${type}', ${i})">❌ Löschen</button>
+        </div>
+    `).join("");
+
+    setTimeout(()=>{
+        document.querySelectorAll(".slider").forEach(initSlider);
+    },100);
+}
+
+/* EDIT */
+async function saveEdit(type, index){
+
+    const title = document.getElementById(`title-${index}`).value;
+    const comment = document.getElementById(`comment-${index}`).value;
+    const files = document.getElementById(`file-${index}`).files;
+
+    let images = [];
+
+    if(files.length > 0){
+        for(let file of files){
+            const base64 = await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.readAsDataURL(file);
+            });
+            images.push(base64);
+        }
+    }
+
+    const res = await fetch("/api/edit", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+            type,
+            index,
+            title,
+            comment,
+            images,
+            password: PASSWORD
+        })
+    });
+
+    const data = await res.json();
+    alert(data.message);
+
+    loadEntries();
+}
+
+/* DELETE */
+async function deleteEntry(type, index){
+
+    if(!confirm("Löschen?")) return;
 
     const res = await fetch("/api/delete", {
         method:"POST",
@@ -222,8 +329,8 @@ async function saveEdit(type, index){
     alert(data.message);
 
     loadEntries();
-}   
-    
+}
+
 </script>
 
 </body>
