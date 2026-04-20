@@ -1,10 +1,10 @@
 export default async function handler(req, res) {
 
-    if (req.method !== "POST") {
-        return res.status(405).json({ message: "Only POST allowed" });
-    }
+    const { file, category, title, comment, password } = req.body;
 
-    const { file, fileName, category, title, comment } = req.body;
+    if (password !== process.env.ADMIN_PASSWORD) {
+        return res.status(401).json({ message: "Kein Zugriff" });
+    }
 
     const token = process.env.GITHUB_TOKEN;
     const repo = process.env.GITHUB_REPO;
@@ -21,9 +21,7 @@ export default async function handler(req, res) {
     const newEntry = {
         title,
         comment,
-        description: comment,
-        image: file,
-        images: [file]
+        image: file
     };
 
     content.push(newEntry);
@@ -37,7 +35,7 @@ export default async function handler(req, res) {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            message: "Neuer Eintrag",
+            message: "Upload",
             content: updated,
             sha: fileData.sha
         })
