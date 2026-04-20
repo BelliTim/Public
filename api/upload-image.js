@@ -45,7 +45,7 @@ export default async function handler(req) {
         });
 
         const data = await uploadRes.json();
-
+console.log("GITHUB RESPONSE:", data);
         // ❌ Fehler anzeigen (JETZT MIT DEBUG)
         if (!uploadRes.ok) {
             console.log("GITHUB ERROR:", data);
