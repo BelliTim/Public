@@ -331,6 +331,11 @@ async function deleteEntry(type, index){
     loadEntries();
 }
 
+document.getElementById("viewCategory").addEventListener("change", loadEntries);
+
+// beim Laden direkt anzeigen
+loadEntries();
+    
 </script>
 
 </body>
