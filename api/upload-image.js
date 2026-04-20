@@ -42,10 +42,13 @@ export default async function handler(req) {
 
         const data = await uploadRes.json();
 
-        if (!uploadRes.ok) {
-            return new Response(JSON.stringify({ error: data.message }), { status: 500 });
-        }
-
+if (!uploadRes.ok) {
+    console.log("GITHUB ERROR:", data);
+    return new Response(JSON.stringify({
+        error: data.message,
+        full: data
+    }), { status: 500 });
+}
         return new Response(JSON.stringify({
             url: `/content/images/${fileName}`
         }), { status: 200 });
