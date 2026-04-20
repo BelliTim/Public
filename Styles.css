@@ -1,4 +1,6 @@
-/* RESET */
+/* =====================
+   RESET / BASE
+===================== */
 body{
 margin:0;
 font-family:'Poppins', sans-serif;
@@ -6,7 +8,13 @@ background:#0f172a;
 color:white;
 }
 
-/* NAVBAR */
+html{
+scroll-behavior:smooth;
+}
+
+/* =====================
+   NAVBAR
+===================== */
 nav{
 display:flex;
 justify-content:space-between;
@@ -15,6 +23,7 @@ padding:20px 40px;
 background:#020617;
 position:sticky;
 top:0;
+z-index:1000;
 }
 
 nav a{
@@ -29,7 +38,9 @@ nav a:hover{
 color:#38bdf8;
 }
 
-/* HERO */
+/* =====================
+   HERO
+===================== */
 .hero{
 height:90vh;
 display:flex;
@@ -49,9 +60,12 @@ font-size:20px;
 opacity:0.7;
 }
 
-/* SECTIONS */
+/* =====================
+   SECTIONS
+===================== */
 .section{
 padding:100px 20%;
+padding-bottom:140px; /* 🔥 Safari Fix */
 }
 
 .section h2{
@@ -59,9 +73,9 @@ font-size:40px;
 margin-bottom:20px;
 }
 
-/* -------------------------
+/* =====================
    ⚽ TRIKOTS (GRID)
-------------------------- */
+===================== */
 .grid{
 display:grid;
 grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
@@ -81,9 +95,9 @@ transition:0.3s;
 transform:scale(1.05);
 }
 
-/* -------------------------
+/* =====================
    📝 SPIELE (BLOG CARDS)
-------------------------- */
+===================== */
 .cards{
 display:flex;
 flex-direction:column;
@@ -95,9 +109,22 @@ padding:20px;
 background:#020617;
 border-radius:12px;
 padding:20px;
+transition:0.3s;
 }
 
-/* Bild-Slider IN Card */
+.card:hover{
+transform:scale(1.02);
+}
+
+.card h3{
+margin:5px 0;
+}
+
+.card p{
+opacity:0.8;
+}
+
+/* Slider in Cards */
 .card-slider{
 position:relative;
 width:100%;
@@ -133,18 +160,9 @@ cursor:pointer;
 .card-slider .prev{left:10px;}
 .card-slider .next{right:10px;}
 
-.card h3{
-margin:5px 0;
-}
-
-.card p{
-opacity:0.8;
-}
-
-/* -------------------------
+/* =====================
    🚗 GARAGE
-------------------------- */
-
+===================== */
 .garage-container{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -174,7 +192,10 @@ border-radius:8px;
 .slider-garage{
 position:relative;
 width:100%;
-max-width:700px;height:clamp(250px, 60dvh, 420px);margin:auto;
+max-width:700px;
+height:clamp(250px, 60svh, 420px); /* 🔥 BEST FIX */
+margin:auto;
+margin-bottom:40px; /* 🔥 verhindert Überlappung */
 overflow:hidden;
 border-radius:10px;
 }
@@ -191,6 +212,7 @@ display:none;
 display:block;
 }
 
+/* Buttons */
 .prev,.next{
 position:absolute;
 top:50%;
@@ -212,13 +234,14 @@ margin-top:10px;
 opacity:0.8;
 }
 
-/* -------------------------
+/* =====================
    📱 MOBILE
-------------------------- */
+===================== */
 @media (max-width:900px){
 
 .section{
 padding:60px 8%;
+padding-bottom:120px;
 }
 
 .hero h1{
@@ -243,14 +266,9 @@ grid-template-columns:1fr;
 gap:25px;
 }
 
-/* 🔥 WICHTIG: NICHT mehr überschreiben */
+/* 🔥 WICHTIG: NICHT überschreiben mit festen px */
 .slider-garage{
-height:clamp(220px, 55dvh, 350px);
+height:clamp(220px, 55svh, 350px);
 }
 
-}
-
-/* Smooth scroll */
-html{
-scroll-behavior:smooth;
 }
