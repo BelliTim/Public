@@ -1,45 +1,77 @@
 export default async function handler(req, res) {
 
-    const { file, category, title, comment, password } = req.body;
-
-    if (password !== process.env.ADMIN_PASSWORD) {
-        return res.status(401).json({ message: "Kein Zugriff" });
+    if(req.method !== "POST"){
+        return res.status(405).json({ message: "Nur POST erlaubt" });
     }
 
-    const token = process.env.GITHUB_TOKEN;
-    const repo = process.env.GITHUB_REPO;
+    const { images, category, title, comment, password } = req.body;
 
-    const path = `content/${category}.json`;
+    if(password !== process.env.ADMIN_PASSWORD){
+        return res.status(401).json({ message: "Falsches Passwort" });
+    }
 
-    const fileRes = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
-        headers: { Authorization: `token ${token}` }
-    });
+    if(!images || images.length === 0 || !title){
+        return res.status(400).json({ message: "Fehlende Daten" });
+    }
 
-    const fileData = await fileRes.json();
-    const content = JSON.parse(Buffer.from(fileData.content, "base64").toString());
-
-    const newEntry = {
-        title,
-        comment,
-        image: file
+    const fileMap = {
+        trikots: "trikots.json",
+        spiele: "spiele.json",
+        garageAktuell: "garageAktuell.json",
+        garageAlt: "garageAlt.json"
     };
 
-    content.push(newEntry);
+    const fileName = fileMap[category];
 
-    const updated = Buffer.from(JSON.stringify(content, null, 2)).toString("base64");
+    if(!fileName){
+        return res.status(400).json({ message: "Ungültige Kategorie" });
+    }
 
-    await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+    const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+    const REPO = "DEIN_USERNAME/DEIN_REPO"; // ❗ ANPASSEN
+
+    const path = `content/${fileName}`;
+
+    // Datei laden
+    const getRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+        headers: {
+            Authorization: `Bearer ${GITHUB_TOKEN}`
+        }
+    });
+
+    let data = [];
+    let sha = null;
+
+    if(getRes.status === 200){
+        const fileData = await getRes.json();
+        sha = fileData.sha;
+
+        const content = JSON.parse(Buffer.from(fileData.content, "base64").toString());
+        data = content;
+    }
+
+    // neuen Eintrag hinzufügen
+    data.push({
+        title,
+        comment,
+        images
+    });
+
+    const updated = Buffer.from(JSON.stringify(data, null, 2)).toString("base64");
+
+    // Datei speichern
+    await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
         method: "PUT",
         headers: {
-            Authorization: `token ${token}`,
+            Authorization: `Bearer ${GITHUB_TOKEN}`,
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            message: "Upload",
+            message: "Neuer Eintrag",
             content: updated,
-            sha: fileData.sha
+            sha
         })
     });
 
-    res.status(200).json({ message: "Upload erfolgreich 🚀" });
+    res.status(200).json({ message: "Upload erfolgreich" });
 }
