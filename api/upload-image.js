@@ -1,27 +1,27 @@
 export default async function handler(req, res) {
 
     if (req.method !== "POST") {
-        return res.status(405).json({ message: "Nur POST erlaubt" });
+        return res.status(405).json({ error: "Nur POST erlaubt" });
     }
 
     try {
-
         const formData = await req.formData();
+
         const file = formData.get("file");
         const password = formData.get("password");
 
         if (password !== process.env.ADMIN_PASSWORD) {
-            return res.status(401).json({ message: "Falsches Passwort" });
+            return res.status(401).json({ error: "Falsches Passwort" });
         }
 
         if (!file) {
-            return res.status(400).json({ message: "Keine Datei" });
+            return res.status(400).json({ error: "Keine Datei" });
         }
 
-        const buffer = Buffer.from(await file.arrayBuffer());
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
 
-        // 🔥 FIX: eindeutiger Dateiname
-        const fileName = `img_${Date.now()}_${Math.floor(Math.random()*10000)}.jpg`;
+        const fileName = `img_${Date.now()}.jpg`;
         const path = `content/images/${fileName}`;
 
         const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -34,22 +34,23 @@ export default async function handler(req, res) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                message: "Bild Upload",
+                message: "Bild hochgeladen",
                 content: buffer.toString("base64")
             })
         });
 
-        if (uploadRes.status !== 201) {
-            const err = await uploadRes.text();
-            return res.status(500).json({ message: "GitHub Fehler", error: err });
+        const data = await uploadRes.json();
+
+        if (!uploadRes.ok) {
+            return res.status(500).json({ error: data.message || "GitHub Fehler" });
         }
 
         return res.status(200).json({
-            url: `https://cdn.jsdelivr.net/gh/${REPO}@main/${path}`
+            url: `/content/images/${fileName}`
         });
 
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ message: "Serverfehler" });
+        return res.status(500).json({ error: "Serverfehler" });
     }
 }
