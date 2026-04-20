@@ -224,13 +224,13 @@ async function upload(){
 
         const data = await uploadRes.json();
 
-        if(data.url){
-            images.push(data.url);
-        } else {
-         alert(
-  "Fehler beim Bild-Upload:\n\n" +
-  JSON.stringify(data, null, 2)
-);
+       if (!uploadRes.ok) {
+    const errorText = await uploadRes.text();
+    console.log("SERVER RESPONSE:", errorText);
+
+    alert("Fehler beim Bild-Upload:\n" + errorText);
+    return;
+}
             return;
         }
     }
