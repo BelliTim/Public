@@ -127,44 +127,157 @@
   
 <script>
 
+// =========================
+// 🚗 GARAGE SLIDER (oben bleibt gleich)
+// =========================
 document.querySelectorAll(".slider-garage").forEach(slider => {
 
 let slides = slider.querySelectorAll(".slide");
 let index = 0;
 
 function showSlide(i){
-
-slides.forEach(s => s.classList.remove("active"));
-slides[i].classList.add("active");
-
+    slides.forEach(s => s.classList.remove("active"));
+    slides[i].classList.add("active");
 }
 
 slider.querySelector(".next").onclick = () => {
-
-index++;
-
-if(index >= slides.length){
-index = 0;
-}
-
-showSlide(index);
-
+    index = (index + 1) % slides.length;
+    showSlide(index);
 };
 
 slider.querySelector(".prev").onclick = () => {
-
-index--;
-
-if(index < 0){
-index = slides.length - 1;
-}
-
-showSlide(index);
-
+    index = (index - 1 + slides.length) % slides.length;
+    showSlide(index);
 };
 
 });
 
+
+// =========================
+// ⚽ TRIKOTS LADEN
+// =========================
+async function loadTrikots() {
+    try {
+        const res = await fetch('/content/trikots.json');
+        const data = await res.json();
+
+        const container = document.getElementById("trikots-container");
+
+        container.innerHTML = data.map(item => `
+            <img src="${item.image}" alt="${item.title}">
+        `).join("");
+
+    } catch {
+        console.log("Fehler bei Trikots");
+    }
+}
+
+
+// =========================
+// ⚽ SPIELE LADEN (mit Slider)
+// =========================
+async function loadSpiele() {
+    try {
+        const res = await fetch('/content/spiele.json');
+        const data = await res.json();
+
+        const container = document.getElementById("spiele-container");
+
+        container.innerHTML = data.map((item, i) => `
+            <div class="card">
+
+                <div class="card-slider">
+                    ${item.images.map((img, index) => `
+                        <img src="${img}" class="${index === 0 ? 'active' : ''}">
+                    `).join("")}
+
+                    ${item.images.length > 1 ? `
+                        <button class="prev">❮</button>
+                        <button class="next">❯</button>
+                    ` : ""}
+                </div>
+
+                <h3>${item.title}</h3>
+                <p>${item.comment}</p>
+
+            </div>
+        `).join("");
+
+        initCardSliders();
+
+    } catch {
+        console.log("Fehler bei Spiele");
+    }
+}
+
+
+// =========================
+// 🚗 GARAGE LADEN
+// =========================
+async function loadGarage(type, containerId) {
+    try {
+        const res = await fetch(`/content/${type}.json`);
+        const data = await res.json();
+
+        const container = document.getElementById(containerId);
+
+        container.innerHTML = data.map(item => `
+            <div class="garage-entry">
+                <h4>${item.title}</h4>
+                <p>${item.description}</p>
+
+                ${item.images.map(img => `
+                    <img src="${img}">
+                `).join("")}
+            </div>
+        `).join("");
+
+    } catch {
+        console.log("Fehler bei", type);
+    }
+}
+
+
+// =========================
+// 🎞️ SLIDER für SPIELE
+// =========================
+function initCardSliders() {
+
+    document.querySelectorAll(".card-slider").forEach(slider => {
+
+        let slides = slider.querySelectorAll("img");
+        let index = 0;
+
+        const next = slider.querySelector(".next");
+        const prev = slider.querySelector(".prev");
+
+        function show(i){
+            slides.forEach(s => s.classList.remove("active"));
+            slides[i].classList.add("active");
+        }
+
+        if(next){
+            next.onclick = () => {
+                index = (index + 1) % slides.length;
+                show(index);
+            };
+        }
+
+        if(prev){
+            prev.onclick = () => {
+                index = (index - 1 + slides.length) % slides.length;
+                show(index);
+            };
+        }
+
+    });
+
+}
+
+
+// =========================
+// 🔐 ADMIN (kann bleiben)
+// =========================
 function addEntry(){
 
 const titel = document.getElementById("titel").value;
@@ -177,14 +290,7 @@ const container = document.getElementById(kategorie);
 const entry = document.createElement("div");
 entry.className = "garage-entry";
 
-const titleEl = document.createElement("h4");
-titleEl.innerText = titel;
-
-const descEl = document.createElement("p");
-descEl.innerText = beschreibung;
-
-entry.appendChild(titleEl);
-entry.appendChild(descEl);
+entry.innerHTML = `<h4>${titel}</h4><p>${beschreibung}</p>`;
 
 let count = 0;
 
@@ -195,100 +301,37 @@ if(count >= 10) break;
 const reader = new FileReader();
 
 reader.onload = function(e){
-
 const img = document.createElement("img");
 img.src = e.target.result;
-
 entry.appendChild(img);
-
 }
 
 reader.readAsDataURL(file);
-
 count++;
 
 }
 
 container.appendChild(entry);
-
 }
 
 function checkPassword(){
-
 const password = document.getElementById("passwordInput").value;
-
-const correctPassword = "astra";
-
-if(password === correctPassword){
-
+if(password === "astra"){
 document.getElementById("passwordOverlay").style.display = "none";
-
 }else{
-
 document.getElementById("error").innerText = "Falsches Passwort";
-
+}
 }
 
-}
 
-</script>
+// =========================
+// 🚀 START
+// =========================
+loadTrikots();
+loadSpiele();
+loadGarage("garageAktuell", "garageAktuell");
+loadGarage("garageAlt", "garageAlt");
 
-<script>
-async function loadContent(type) {
-    try {
-        const res = await fetch(`/content/${type}.json`);
-        const data = await res.json();
-
-        const container = document.getElementById(type + "-container");
-
-        container.innerHTML = data.map(item => `
-            <div style="margin:20px; padding:20px; border:1px solid #ccc; border-radius:10px;">
-                <h3>${item.title}</h3>
-                <p>${item.comment}</p>
-                ${item.image ? `<img src="${item.image}" style="max-width:300px;">` : ""}
-            </div>
-        `).join("");
-    } catch (e) {
-        console.log("Keine Daten für", type);
-    }
-
-  
-}
-
-loadContent("trikots");
-loadContent("spiele");
-</script>
-  <script>
-async function loadContent(type) {
-    try {
-        const res = await fetch(`/content/${type}.json`);
-        const data = await res.json();
-
-        const container = document.getElementById(type + "-container");
-
-        if (type === "trikots") {
-            container.innerHTML = data.map(item => `
-                <img src="${item.image}" alt="${item.title}">
-            `).join("");
-        }
-
-        if (type === "spiele") {
-            container.innerHTML = data.map(item => `
-                <div class="card">
-                    ${item.image ? `<img src="${item.image}">` : ""}
-                    <h3>${item.title}</h3>
-                    <p>${item.comment}</p>
-                </div>
-            `).join("");
-        }
-
-    } catch (e) {
-        console.log("Fehler beim Laden:", type);
-    }
-}
-
-loadContent("trikots");
-loadContent("spiele");
 </script>
 </body>
 </html>
