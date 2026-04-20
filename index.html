@@ -256,7 +256,7 @@ scroll-behavior:smooth;
 <nav>
 
 <div>
-<a href="#lebenslauf">Lebenslauf</a>
+<a href="#fussball">Fussball</a>
 </div>
 
 <div>
@@ -276,16 +276,19 @@ scroll-behavior:smooth;
 
 </section>
 
-<section class="section" id="lebenslauf">
+<section id="fussball" style="padding: 50px; text-align: center;">
+    <h2>Fußball</h2>
 
-<h2>Lebenslauf</h2>
+    <div style="margin-top: 30px;">
+        <a href="#trikots" style="margin: 10px; padding: 10px 20px; background: #3b82f6; color: white; border-radius: 8px; text-decoration: none;">
+            Trikots
+        </a>
 
-<div class="card">
-<p>Hier kannst du später deinen Lebenslauf eintragen.</p>
-</div>
-
+        <a href="#spiele" style="margin: 10px; padding: 10px 20px; background: #3b82f6; color: white; border-radius: 8px; text-decoration: none;">
+            Spiele
+        </a>
+    </div>
 </section>
-
 <section class="section" id="garage">
 
 <h2>Garage</h2>
@@ -475,5 +478,29 @@ document.getElementById("error").innerText = "Falsches Passwort";
 
 </script>
 
+<script>
+async function loadContent(type) {
+    try {
+        const res = await fetch(`/content/${type}.json`);
+        const data = await res.json();
+
+        const container = document.getElementById(type + "-container");
+
+        container.innerHTML = data.map(item => `
+            <div style="margin:20px; padding:20px; border:1px solid #ccc; border-radius:10px;">
+                <h3>${item.title}</h3>
+                <p>${item.comment}</p>
+                ${item.image ? `<img src="${item.image}" style="max-width:300px;">` : ""}
+            </div>
+        `).join("");
+    } catch (e) {
+        console.log("Keine Daten für", type);
+    }
+}
+
+loadContent("trikots");
+loadContent("spiele");
+</script>
+  
 </body>
 </html>
