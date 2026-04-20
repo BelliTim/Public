@@ -227,11 +227,9 @@ async function upload(){
         if(data.url){
             images.push(data.url);
         } else {
-            alert(
-  "Fehler beim Bild-Upload:\n" +
-  (data.error || data.message) +
-  "\n\nDETAILS:\n" +
-  JSON.stringify(data.details, null, 2)
+         alert(
+  "Fehler beim Bild-Upload:\n\n" +
+  JSON.stringify(data, null, 2)
 );
             return;
         }
