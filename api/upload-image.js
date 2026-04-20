@@ -14,6 +14,7 @@ export default async function handler(req) {
         const file = formData.get("file");
         const password = formData.get("password");
 
+        // 🔐 Passwort prüfen
         if (password !== process.env.ADMIN_PASSWORD) {
             return new Response(JSON.stringify({ error: "Falsches Passwort" }), { status: 401 });
         }
@@ -22,12 +23,15 @@ export default async function handler(req) {
             return new Response(JSON.stringify({ error: "Keine Datei" }), { status: 400 });
         }
 
+        // 📦 Datei verarbeiten
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
+        // 🧠 EINZIGARTIGER DATEINAME (wichtig!)
         const fileName = `img_${Date.now()}_${Math.random().toString(36).substring(2,8)}.jpg`;
         const path = `content/images/${fileName}`;
 
+        // 🚀 Upload zu GitHub
         const uploadRes = await fetch(`https://api.github.com/repos/BelliTim/Public/contents/${path}`, {
             method: "PUT",
             headers: {
@@ -42,19 +46,24 @@ export default async function handler(req) {
 
         const data = await uploadRes.json();
 
-if (!uploadRes.ok) {
-    console.log("GITHUB ERROR:", data);
-    return new Response(JSON.stringify({
-        error: data.message,
-        full: data
-    }), { status: 500 });
-}
+        // ❌ Fehler anzeigen (JETZT MIT DEBUG)
+        if (!uploadRes.ok) {
+            console.log("GITHUB ERROR:", data);
+            return new Response(JSON.stringify({
+                error: data.message,
+                full: data
+            }), { status: 500 });
+        }
+
+        // ✅ Erfolg
         return new Response(JSON.stringify({
             url: `/content/images/${fileName}`
         }), { status: 200 });
 
     } catch (err) {
-        console.error(err);
-        return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+        console.error("SERVER ERROR:", err);
+        return new Response(JSON.stringify({
+            error: err.message
+        }), { status: 500 });
     }
 }
