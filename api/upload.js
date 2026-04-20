@@ -6,17 +6,14 @@ export default async function handler(req, res) {
 
     const { images, category, title, comment, password } = req.body;
 
-    // 🔐 Passwort prüfen
     if (password !== process.env.ADMIN_PASSWORD) {
         return res.status(401).json({ message: "Falsches Passwort" });
     }
 
-    // 📦 Validierung
     if (!images || images.length === 0 || !title) {
         return res.status(400).json({ message: "Fehlende Daten" });
     }
 
-    // 📁 Kategorien
     const fileMap = {
         trikots: "trikots.json",
         spiele: "spiele.json",
@@ -25,21 +22,50 @@ export default async function handler(req, res) {
     };
 
     const fileName = fileMap[category];
-
     if (!fileName) {
         return res.status(400).json({ message: "Ungültige Kategorie" });
     }
 
-    // 🔑 ENV Variablen
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    const REPO = "BelliTim/Public"; // ✅ HIER ANPASSEN falls anders
+    const REPO = "BelliTim/Public";
 
-    const path = `content/${fileName}`;
+    const imagePaths = [];
 
     try {
 
-        // 📥 Datei laden
-        const getRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+        // 🔥 1. Bilder einzeln hochladen
+        for (let i = 0; i < images.length; i++) {
+
+            const base64 = images[i].split(",")[1];
+
+            const fileNameImg = `img_${Date.now()}_${i}.jpg`;
+            const path = `content/images/${fileNameImg}`;
+
+            const uploadRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${GITHUB_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: "Bild Upload",
+                    content: base64
+                })
+            });
+
+            if (uploadRes.status !== 201) {
+                const err = await uploadRes.text();
+                console.error(err);
+                return res.status(500).json({ message: "Bild Upload fehlgeschlagen" });
+            }
+
+            imagePaths.push(`/content/images/${fileNameImg}`);
+        }
+
+        // 🔥 2. JSON laden
+        const jsonPath = `content/${fileName}`;
+
+        const getRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
             headers: {
                 Authorization: `Bearer ${GITHUB_TOKEN}`
             }
@@ -52,26 +78,23 @@ export default async function handler(req, res) {
             const fileData = await getRes.json();
             sha = fileData.sha;
 
-            const content = JSON.parse(
-                Buffer.from(fileData.content, "base64").toString()
-            );
-
-            data = Array.isArray(content) ? content : [];
+            const decoded = atob(fileData.content.replace(/\n/g, ""));
+            data = JSON.parse(decoded);
         }
 
-        // ➕ neuen Eintrag oben hinzufügen
+        // 🔥 3. Eintrag hinzufügen
         data.unshift({
             title,
             comment,
-            images
+            images: imagePaths
         });
 
         const updated = Buffer.from(
             JSON.stringify(data, null, 2)
         ).toString("base64");
 
-        // 📤 speichern
-        const updateRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+        // 🔥 4. JSON speichern
+        const saveRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${GITHUB_TOKEN}`,
@@ -84,14 +107,16 @@ export default async function handler(req, res) {
             })
         });
 
-        if (updateRes.status !== 200 && updateRes.status !== 201) {
-            return res.status(500).json({ message: "Fehler beim Speichern" });
+        if (saveRes.status !== 200 && saveRes.status !== 201) {
+            const err = await saveRes.text();
+            console.error(err);
+            return res.status(500).json({ message: "JSON speichern fehlgeschlagen" });
         }
 
         return res.status(200).json({ message: "Upload erfolgreich 🚀" });
 
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ message: "Serverfehler" });
+        return res.status(500).json({ message: err.message });
     }
 }
