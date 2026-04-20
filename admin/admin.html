@@ -209,24 +209,9 @@ async function upload(){
 
     for(let file of files){
 
-    file = await compressImage(file); // 🔥 DAS IST DER FIX
-
-    if(images.length >= 10) break;
-
-    const base64 = await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = e => resolve(e.target.result);
-        reader.readAsDataURL(file);
-    });
-
-    images.push(base64);
-}
-
         if(images.length >= 10) break;
 
-        await new Promise(r => setTimeout(r, 300));
-
-        // 🔥 BILD KOMPRIMIEREN
+        // 🔥 Bild komprimieren
         const compressed = await compressImage(file);
 
         const formData = new FormData();
@@ -234,20 +219,21 @@ async function upload(){
         formData.append("password", PASSWORD);
 
         const uploadRes = await fetch("/api/upload-image", {
-            method:"POST",
+            method: "POST",
             body: formData
         });
 
         const data = await uploadRes.json();
 
         if(data.url){
-            images.push(data.url);
+            images.push(data.url); // ✅ nur URL speichern
         } else {
             alert("Fehler beim Bild-Upload:\n" + (data.error || data.message));
             return;
         }
     }
 
+    // 🔥 JSON speichern
     const res = await fetch("/api/upload", {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
@@ -260,43 +246,11 @@ async function upload(){
         })
     });
 
-    const data = await res.json();
-    alert(data.message);
+    const result = await res.json();
+    alert(result.message);
 
     loadEntries();
 }
-async function compressImage(file){
-    return new Promise(resolve => {
-
-        const img = new Image();
-        const reader = new FileReader();
-
-        reader.onload = e => {
-            img.src = e.target.result;
-        };
-
-        img.onload = () => {
-            const canvas = document.createElement("canvas");
-
-            const maxWidth = 1200;
-            const scale = maxWidth / img.width;
-
-            canvas.width = maxWidth;
-            canvas.height = img.height * scale;
-
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-            canvas.toBlob(blob => {
-                resolve(new File([blob], file.name, {
-                    type: "image/jpeg"
-                }));
-            }, "image/jpeg", 0.7);
-        };
-
-        reader.readAsDataURL(file);
-    });
-}   
 /* SLIDER */
 function initSlider(container){
     let index = 0;
