@@ -195,6 +195,8 @@ async function login(){
 /* UPLOAD */
 async function upload(){
 
+    alert("Upload gestartet");
+
     const files = document.getElementById("file").files;
     const title = document.getElementById("title").value;
     const comment = document.getElementById("comment").value;
@@ -219,6 +221,8 @@ async function upload(){
         images.push(base64);
     }
 
+    alert("Sende an Server...");
+
     const res = await fetch("/api/upload", {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
@@ -231,7 +235,10 @@ async function upload(){
         })
     });
 
+    alert("Response Status: " + res.status);
+
     const data = await res.json();
+
     alert(data.message);
 
     loadEntries();
