@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     }
 
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-    const REPO = "DEIN_USERNAME/DEIN_REPO"; // ❗ ANPASSEN
+    const REPO = "BelliTim/Public_REPO"; // ❗ ANPASSEN
 
     const path = `content/${fileName}`;
 
