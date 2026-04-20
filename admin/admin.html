@@ -6,141 +6,99 @@
 
 <style>
 body {
-  font-family: Arial;
-  background: #0f0f0f;
-  color: white;
-  text-align: center;
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    text-align: center;
 }
 
 .container {
-  margin-top: 80px;
+    margin-top: 80px;
 }
 
-input, select, button {
-  padding: 10px;
-  margin: 10px;
-  border-radius: 8px;
-  border: none;
+input, textarea, select {
+    width: 80%;
+    max-width: 400px;
+    margin: 10px;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
 }
 
 button {
-  background: #00bcd4;
-  color: black;
-  cursor: pointer;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #3b82f6;
+    color: white;
+    cursor: pointer;
 }
 
 button:hover {
-  background: #0097a7;
-}
-
-#preview {
-  max-width: 200px;
-  margin-top: 20px;
-  border-radius: 10px;
+    background: #2563eb;
 }
 </style>
-</head>
 
+</head>
 <body>
 
-<div class="container" id="loginBox">
-  <h2>🔒 Admin Login</h2>
-  <input type="password" id="pw" placeholder="Passwort">
-  <br>
-  <button onclick="login()">Login</button>
-</div>
+<div class="container">
+    <h1>Admin Upload</h1>
 
-<div class="container" id="panel" style="display:none;">
-  <h2>⚙️ Admin Panel</h2>
+    <!-- Kategorie -->
+    <select id="category">
+        <option value="trikots">Trikots</option>
+        <option value="spiele">Spiele</option>
+    </select>
 
-  <select id="type">
-    <option value="trikots">Trikots</option>
-    <option value="spiele">Spiele</option>
-  </select>
-  <br>
+    <!-- Titel -->
+    <input type="text" id="title" placeholder="Titel">
 
-  <input type="file" id="file" accept="image/*"><br>
+    <!-- Kommentar -->
+    <textarea id="comment" placeholder="Kommentar"></textarea>
 
-  <img id="preview" style="display:none;" />
+    <!-- Bild -->
+    <input type="file" id="file">
 
-  <br>
-  <button onclick="upload()">📤 Hochladen</button>
-  <br><br>
+    <br>
+    <button onclick="upload()">Hochladen</button>
 
-  <button onclick="logout()">Logout</button>
+    <p id="status"></p>
 </div>
 
 <script>
-const STORAGE_KEY = "admin_login";
-
-// Auto Login
-if (localStorage.getItem(STORAGE_KEY)) {
-  showPanel();
-}
-
-function login() {
-  const pw = document.getElementById("pw").value;
-
-  if (!pw) {
-    alert("Passwort fehlt");
-    return;
-  }
-
-  localStorage.setItem(STORAGE_KEY, pw);
-  showPanel();
-}
-
-function logout() {
-  localStorage.removeItem(STORAGE_KEY);
-  location.reload();
-}
-
-function showPanel() {
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("panel").style.display = "block";
-}
-
-// Vorschau
-document.getElementById("file").addEventListener("change", (e) => {
-  const file = e.target.files[0];
-  const preview = document.getElementById("preview");
-
-  if (file) {
-    preview.src = URL.createObjectURL(file);
-    preview.style.display = "block";
-  }
-});
-
-// Upload
 async function upload() {
-  const file = document.getElementById("file").files[0];
-  const type = document.getElementById("type").value;
-  const pw = localStorage.getItem(STORAGE_KEY);
+    const file = document.getElementById("file").files[0];
+    const title = document.getElementById("title").value;
+    const comment = document.getElementById("comment").value;
+    const category = document.getElementById("category").value;
 
-  if (!file) {
-    alert("Keine Datei gewählt");
-    return;
-  }
+    if (!file || !title) {
+        alert("Titel und Bild erforderlich!");
+        return;
+    }
 
-  const reader = new FileReader();
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
 
-  reader.onload = async function() {
-    const base64 = reader.result.split(",")[1];
+    reader.onload = async () => {
+        const res = await fetch("/api/upload", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                file: reader.result,
+                fileName: file.name,
+                category: category,
+                title: title,
+                comment: comment
+            })
+        });
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        password: pw,
-        filename: type + "/" + file.name,
-        content: base64
-      })
-    });
-
-    alert(await res.text());
-  };
-
-  reader.readAsDataURL(file);
+        const data = await res.json();
+        document.getElementById("status").innerText = data.message;
+    };
 }
 </script>
 
