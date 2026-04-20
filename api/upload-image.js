@@ -23,11 +23,16 @@ export default async function handler(req) {
             return new Response(JSON.stringify({ error: "Keine Datei" }), { status: 400 });
         }
 
-        // 📦 Datei verarbeiten
+        // 📦 Datei lesen
         const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
 
-        // 🧠 EINZIGARTIGER DATEINAME (wichtig!)
+        // 🔥 EDGE FIX (kein Buffer!)
+        const base64 = btoa(
+            new Uint8Array(bytes)
+                .reduce((data, byte) => data + String.fromCharCode(byte), "")
+        );
+
+        // 🧠 EINZIGARTIGER DATEINAME
         const fileName = `img_${Date.now()}_${Math.random().toString(36).substring(2,8)}.jpg`;
         const path = `content/images/${fileName}`;
 
@@ -40,13 +45,14 @@ export default async function handler(req) {
             },
             body: JSON.stringify({
                 message: "Bild hochgeladen",
-                content: buffer.toString("base64")
+                content: base64
             })
         });
 
         const data = await uploadRes.json();
-console.log("GITHUB RESPONSE:", data);
-        // ❌ Fehler anzeigen (JETZT MIT DEBUG)
+        console.log("GITHUB RESPONSE:", data);
+
+        // ❌ Fehler anzeigen
         if (!uploadRes.ok) {
             console.log("GITHUB ERROR:", data);
             return new Response(JSON.stringify({
