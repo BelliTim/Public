@@ -143,7 +143,7 @@ async function loadGarage(type, containerId) {
 
         const container = document.getElementById(containerId);
 
-        container.innerHTML = data.map(item => {
+        container.innerHTML = data.map((item, i) => {
             const imageList = getImageList(item);
 
             return `
@@ -151,12 +151,21 @@ async function loadGarage(type, containerId) {
                     <h4>${item.title || ""}</h4>
                     <p>${item.comment || item.description || ""}</p>
 
-                    ${imageList.map(img => `
-                        <img src="${img}" alt="${item.title || ""}">
-                    `).join("")}
+                    <div class="card-slider garage-slider">
+                        ${imageList.map((img, index) => `
+                            <img src="${img}" class="${index === 0 ? 'active' : ''}">
+                        `).join("")}
+
+                        ${imageList.length > 1 ? `
+                            <button class="prev">❮</button>
+                            <button class="next">❯</button>
+                        ` : ""}
+                    </div>
                 </div>
             `;
         }).join("");
+
+        initCardSliders();
 
     } catch {
         console.log("Fehler bei", type);
