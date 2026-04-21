@@ -170,39 +170,57 @@ button {
 let PASSWORD = "";
 
 /* LOGIN */
+
 async function login(){
 
     const pw = document.getElementById("passwordInput").value;
 
-    const res = await fetch("/api/login", {
+    const res = await fetch("https://tbellinghausen.de/api/login", {
+
         method:"POST",
+
         headers:{ "Content-Type":"application/json" },
+
         body: JSON.stringify({ password: pw })
+
     });
 
     if(res.status === 200){
+
         PASSWORD = pw;
 
         document.getElementById("loginOverlay").style.display = "none";
+
         document.getElementById("adminPanel").style.display = "block";
 
         loadEntries();
+
     } else {
+
         document.getElementById("error").innerText = "Falsches Passwort";
+
     }
+
 }
 
 /* UPLOAD */
+
 async function upload(){
 
     const files = document.getElementById("file").files;
+
     const title = document.getElementById("title").value;
+
     const comment = document.getElementById("comment").value;
+
     const category = document.getElementById("category").value;
 
     if(files.length === 0 || !title){
+
         alert("Titel + Bild erforderlich");
+
         return;
+
     }
 
     let images = [];
@@ -214,77 +232,112 @@ async function upload(){
         const compressed = await compressImage(file);
 
         const formData = new FormData();
+
         formData.append("file", compressed);
+
         formData.append("password", PASSWORD);
 
-        const uploadRes = await fetch("/api/upload-image", {
+        const uploadRes = await fetch("https://tbellinghausen.de/api/upload-image", {
+
             method:"POST",
+
             body: formData
+
         });
 
         const data = await uploadRes.json();
 
-       if (!uploadRes.ok) {
-    const errorText = await uploadRes.text();
-    console.log("SERVER RESPONSE:", errorText);
+        if (!uploadRes.ok) {
 
-    alert("Fehler beim Bild-Upload:\n" + errorText);
-    return;
-}
+            console.log("SERVER RESPONSE:", data);
+
+            alert("Fehler beim Bild-Upload:\n" + (data.error || data.message));
+
             return;
+
         }
+
+        images.push(data.url);
+
     }
 
-    const res = await fetch("/api/upload", {
+    const res = await fetch("https://tbellinghausen.de/api/upload", {
+
         method:"POST",
+
         headers:{ "Content-Type":"application/json" },
+
         body: JSON.stringify({
+
             images,
+
             category,
+
             title,
+
             comment,
+
             password: PASSWORD
+
         })
+
     });
 
     const data = await res.json();
+
     alert(data.message);
 
     loadEntries();
+
 }
+
+/* REST (unverändert lassen) */
+
 async function compressImage(file){
+
     return new Promise(resolve => {
 
         const img = new Image();
+
         const reader = new FileReader();
 
         reader.onload = e => {
+
             img.src = e.target.result;
+
         };
 
         img.onload = () => {
+
             const canvas = document.createElement("canvas");
 
             const maxWidth = 1200;
+
             const scale = maxWidth / img.width;
 
             canvas.width = maxWidth;
+
             canvas.height = img.height * scale;
 
             const ctx = canvas.getContext("2d");
+
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             canvas.toBlob(blob => {
+
                 resolve(new File([blob], file.name, {
+
                     type: "image/jpeg"
+
                 }));
+
             }, "image/jpeg", 0.7);
+
         };
 
         reader.readAsDataURL(file);
-    });
-}
-    
+
+    })
 /* SLIDER */
 function initSlider(container){
     let index = 0;
