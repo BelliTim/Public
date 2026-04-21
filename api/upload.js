@@ -19,6 +19,7 @@ export default async function handler(req, res) {
         spiele: "spiele.json",
         garageAktuell: "garageAktuell.json",
         garageAlt: "garageAlt.json"
+        blog: "blog.json"
     };
 
     const fileName = fileMap[category];
