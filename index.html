@@ -60,6 +60,11 @@
     </a>
 </footer>
 
+<div id="lightbox" class="lightbox" onclick="closeLightbox()" style="display:none;">
+    <span class="lightbox-close">&times;</span>
+    <img id="lightbox-img" class="lightbox-img" src="" alt="Großansicht">
+</div>
+    
 <script>
 // =========================
 // Hilfsfunktion für altes + neues Format
@@ -68,6 +73,19 @@ function getImageList(item) {
     if (Array.isArray(item.images)) return item.images;
     if (item.image) return [item.image];
     return [];
+}
+
+function openLightbox(src) {
+    const box = document.getElementById("lightbox");
+    const img = document.getElementById("lightbox-img");
+
+    img.src = src;
+    box.style.display = "flex";
+}
+
+function closeLightbox() {
+    document.getElementById("lightbox").style.display = "none";
+    document.getElementById("lightbox-img").src = "";
 }
 
 // =========================
@@ -83,9 +101,18 @@ async function loadTrikots() {
         container.innerHTML = data.map(item => {
             const imageList = getImageList(item);
             const firstImage = imageList[0] || "";
+            const season = item.title || "";
+            const type = item.comment || item.description || "";
 
             return `
-                <img src="${firstImage}" alt="${item.title || ""}">
+                <div class="trikot-card">
+                    <div class="trikot-season">${season}</div>
+                    <div class="trikot-type">${type}</div>
+
+                    <button class="trikot-image-wrap" type="button" onclick="openLightbox('${firstImage}')">
+                        <img src="${firstImage}" alt="${season}">
+                    </button>
+                </div>
             `;
         }).join("");
 
