@@ -109,23 +109,119 @@ margin-bottom:20px;
 /* =====================
    ⚽ TRIKOTS (GRID)
 ===================== */
+/* =====================
+   ⚽ TRIKOT-KARTEN
+===================== */
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit, minmax(180px,1fr));
-gap:15px;
+grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
+gap:20px;
 padding:20px;
 }
 
-.grid img{
+.trikot-card{
+background:#020617;
+border-radius:18px;
+padding:18px 16px 20px;
+box-shadow:0 10px 25px rgba(0,0,0,0.25);
+transition:0.3s;
+text-align:center;
+}
+
+.trikot-card:hover{
+transform:translateY(-4px);
+}
+
+.trikot-season{
+font-size:22px;
+font-weight:600;
+margin-bottom:6px;
+}
+
+.trikot-type{
+font-size:14px;
+opacity:0.8;
+margin-bottom:14px;
+min-height:20px;
+}
+
+.trikot-image-wrap{
 width:100%;
-height:200px;
-object-fit:cover;
-border-radius:10px;
+border:none;
+background:#111827;
+border-radius:28px 28px 18px 18px;
+padding:18px 14px 14px;
+cursor:pointer;
+position:relative;
+overflow:hidden;
+}
+
+.trikot-image-wrap::before{
+content:"";
+position:absolute;
+top:0;
+left:50%;
+transform:translateX(-50%);
+width:38%;
+height:16px;
+background:#020617;
+border-radius:0 0 14px 14px;
+z-index:2;
+}
+
+.trikot-image-wrap img{
+width:100%;
+height:260px;
+object-fit:contain;
+object-position:center;
+display:block;
+border-radius:12px;
 transition:0.3s;
 }
 
-.grid img:hover{
-transform:scale(1.05);
+.trikot-image-wrap:hover img{
+transform:scale(1.03);
+}
+
+/* =====================
+   🔍 LIGHTBOX
+===================== */
+.lightbox{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.9);
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:3000;
+padding:20px;
+}
+
+.lightbox-img{
+max-width:95vw;
+max-height:90vh;
+border-radius:14px;
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+}
+
+.lightbox-close{
+position:absolute;
+top:20px;
+right:24px;
+font-size:42px;
+color:white;
+cursor:pointer;
+line-height:1;
+}
+
+@media (max-width:900px){
+.trikot-image-wrap img{
+height:220px;
+}
+
+.trikot-season{
+font-size:20px;
+}
 }
 
 /* =====================
