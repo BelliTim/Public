@@ -86,7 +86,7 @@ export default async function handler(req, res) {
         // 🔥 3. Eintrag hinzufügen
         data.unshift({
             title,
-            dataRange,
+            dateRange,
             comment,
             images: imagePaths
         });
