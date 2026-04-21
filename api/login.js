@@ -20,7 +20,9 @@ export default async function handler(req, res) {
       return res.status(500).json({ message: "Fehler beim Parsen" });
     }
 
-    const password = fields.password;
+    const password = Array.isArray(fields.password)
+  ? fields.password[0]
+  : fields.password;
 
     if (!password) {
       return res.status(400).json({ message: "Kein Passwort" });
