@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog | Deine Website</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #071224;
+      --bg-main: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.92);
+      --blue-dark: #1e3a8a;
+      --blue-mid: #2563eb;
+      --blue-light: #60a5fa;
+      --text-main: #f8fafc;
+      --text-soft: #cbd5e1;
+      --border: rgba(96, 165, 250, 0.18);
+      --shadow: 0 10px 35px rgba(0, 0, 0, 0.28);
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.22), transparent 30%),
+        radial-gradient(circle at top right, rgba(96, 165, 250, 0.18), transparent 28%),
+        linear-gradient(180deg, #081120 0%, #0f172a 45%, #111c33 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      width: 100%;
+      backdrop-filter: blur(12px);
+      background: rgba(8, 17, 32, 0.88);
+      border-bottom: 1px solid rgba(96, 165, 250, 0.12);
+    }
+
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .logo {
+      font-size: 1.15rem;
+      font-weight: bold;
+      color: white;
+      letter-spacing: 0.4px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .nav-links a {
+      color: var(--text-soft);
+      text-decoration: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      transition: 0.25s ease;
+      font-size: 0.97rem;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(96, 165, 250, 0.18));
+      color: #ffffff;
+      box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.18);
+    }
+
+    /* MAIN */
+    .page-wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 34px 20px 70px;
+    }
+
+    .hero {
+      background: linear-gradient(145deg, rgba(30, 58, 138, 0.48), rgba(15, 23, 42, 0.9));
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 34px 26px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(96, 165, 250, 0.18), transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-bottom: 12px;
+      line-height: 1.08;
+    }
+
+    .hero p {
+      color: var(--text-soft);
+      max-width: 760px;
+      font-size: 1.02rem;
+      line-height: 1.6;
+    }
+
+    /* SECTION HEAD */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 18px 0 18px;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2 {
+      font-size: 1.5rem;
+    }
+
+    .section-head span {
+      color: var(--text-soft);
+      font-size: 0.95rem;
+    }
+
+    /* BLOG GRID */
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .blog-card {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.97), rgba(15, 23, 42, 0.97));
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.22s ease, border-color 0.22s ease;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .blog-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(96, 165, 250, 0.35);
+    }
+
+    .blog-image {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      background: linear-gradient(135deg, #1e3a8a, #2563eb, #60a5fa);
+    }
+
+    .blog-content {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .blog-date {
+      color: var(--blue-light);
+      font-size: 0.9rem;
+      font-weight: bold;
+      letter-spacing: 0.2px;
+    }
+
+    .blog-title {
+      font-size: 1.2rem;
+      line-height: 1.3;
+    }
+
+    .blog-text {
+      color: var(--text-soft);
+      line-height: 1.6;
+      font-size: 0.97rem;
+    }
+
+    .blog-button {
+      margin-top: auto;
+      display: inline-block;
+      text-decoration: none;
+      color: white;
+      background: linear-gradient(135deg, var(--blue-mid), var(--blue-light));
+      padding: 11px 15px;
+      border-radius: 12px;
+      font-weight: bold;
+      transition: 0.22s ease;
+      width: fit-content;
+    }
+
+    .blog-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    /* EMPTY / INFO BOX */
+    .info-box {
+      margin-top: 28px;
+      background: rgba(15, 23, 42, 0.82);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      color: var(--text-soft);
+      line-height: 1.7;
+      box-shadow: var(--shadow);
+    }
+
+    .info-box strong {
+      color: white;
+    }
+
+    /* FOOTER */
+    footer {
+      margin-top: 38px;
+      padding: 24px 0 10px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+
+    /* MOBILE */
+    @media (max-width: 980px) {
+      .blog-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .nav-inner {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .logo {
+        text-align: center;
+      }
+
+      .nav-links {
+        justify-content: center;
+      }
+
+      .hero {
+        padding: 26px 18px;
+        border-radius: 20px;
+      }
+
+      .blog-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .blog-image {
+        height: 210px;
+      }
+
+      .blog-content {
+        padding: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">Deine Website</a>
+
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="garage.html">Garage</a>
+        <a href="lebenslauf.html">Lebenslauf</a>
+        <a href="blog.html" class="active">Blog</a>
+        <a href="rechtliches.html">Rechtliches</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-wrap">
+    <section class="hero">
+      <h1>Mein Blog</h1>
+      <p>
+        Hier können später deine Blogbeiträge angezeigt werden – komplett getrennt von der Hauptseite,
+        aber im gleichen Stil. Die Seite ist schon so aufgebaut, dass wir als Nächstes eine Admin-Upload-Funktion
+        dafür ergänzen können.
+      </p>
+    </section>
+
+    <div class="section-head">
+      <h2>Neueste Beiträge</h2>
+      <span>Vorbereitet für spätere Admin-Anbindung</span>
+    </div>
+
+    <section class="blog-grid" id="blogGrid">
+
+      <article class="blog-card">
+        <img src="https://via.placeholder.com/800x500/1e3a8a/ffffff?text=Blog+Beitrag+1" alt="Blog Beitrag 1" class="blog-image">
+        <div class="blog-content">
+          <div class="blog-date">21.04.2026</div>
+          <h3 class="blog-title">Erster Beispiel-Beitrag</h3>
+          <p class="blog-text">
+            Das ist ein Platzhalter für deinen ersten Blogpost. Später kann hier automatisch ein Titel,
+            Bild, Datum und Text aus der Admin-Seite geladen werden.
+          </p>
+          <a href="#" class="blog-button">Mehr lesen</a>
+        </div>
+      </article>
+
+      <article class="blog-card">
+        <img src="https://via.placeholder.com/800x500/2563eb/ffffff?text=Blog+Beitrag+2" alt="Blog Beitrag 2" class="blog-image">
+        <div class="blog-content">
+          <div class="blog-date">20.04.2026</div>
+          <h3 class="blog-title">Design im gleichen Stil</h3>
+          <p class="blog-text">
+            Diese Unterseite übernimmt denselben modernen Look mit dunklem Blau, hellem Blau und
+            passenden Karten wie deine Hauptseite und das Rechtliches-Layout.
+          </p>
+          <a href="#" class="blog-button">Mehr lesen</a>
+        </div>
+      </article>
+
+      <article class="blog-card">
+        <img src="https://via.placeholder.com/800x500/60a5fa/0f172a?text=Blog+Beitrag+3" alt="Blog Beitrag 3" class="blog-image">
+        <div class="blog-content">
+          <div class="blog-date">19.04.2026</div>
+          <h3 class="blog-title">Admin-Vorbereitung eingebaut</h3>
+          <p class="blog-text">
+            Die Struktur ist schon so vorbereitet, dass wir im nächsten Schritt deine Upload-Funktion
+            anschließen und neue Beiträge automatisch einfügen lassen können.
+          </p>
+          <a href="#" class="blog-button">Mehr lesen</a>
+        </div>
+      </article>
+
+    </section>
+
+    <section class="info-box">
+      <strong>Wichtig für später:</strong><br><br>
+      Diese Seite ist absichtlich schon sauber vorbereitet, damit wir als Nächstes einfach eine
+      Blog-Upload-Funktion in deine Admin-Seite einbauen können. Dann können wir z. B. später:
+      Titel, Datum, Bild, Kurztext und den ganzen Beitrag automatisch hier einfügen lassen.
+    </section>
+  </main>
+
+  <footer>
+    © 2026 Deine Website
+  </footer>
+
+</body>
+</html>
