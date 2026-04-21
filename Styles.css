@@ -1,3 +1,13 @@
+/*=====================
+zeilenumbrüche Bleiben gespeichert
+=====================*/
+
+.garage-entry p,
+.card p,
+.trikot-type {
+    white-space: pre-line;
+}
+
 /* =====================
 Text Design unter Willkommen
 ===================== */
