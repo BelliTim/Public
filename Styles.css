@@ -156,21 +156,20 @@ cursor:pointer;
 position:relative;
 overflow:hidden;
 display:block;
-padding:20px 18px 18px;
+padding:18px 8px 12px;
 clip-path:polygon(
   18% 0%,
   82% 0%,
-  100% 12%,
-  92% 34%,
-  78% 24%,
+  100% 10%,
+  92% 27%,
+  78% 20%,
   78% 100%,
   22% 100%,
-  22% 24%,
-  8% 34%,
-  0% 12%
+  22% 20%,
+  8% 27%,
+  0% 10%
 );
 }
-
 
 /* Kragen */
 .trikot-image-wrap::before{
