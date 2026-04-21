@@ -18,7 +18,7 @@ export default async function handler(req, res) {
         trikots: "trikots.json",
         spiele: "spiele.json",
         garageAktuell: "garageAktuell.json",
-        garageAlt: "garageAlt.json"
+        garageAlt: "garageAlt.json",
         blog: "blog.json"
     };
 
