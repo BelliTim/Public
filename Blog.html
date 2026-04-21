@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog | Deine Website</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:Arial, sans-serif;
+    background:
+    radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 30%),
+    radial-gradient(circle at top right, rgba(96,165,250,0.12), transparent 25%),
+    linear-gradient(180deg,#071224 0%,#0f172a 45%,#111c33 100%);
+    color:white;
+    min-height:100vh;
+}
+
+/* NAVBAR */
+.navbar{
+    position:sticky;
+    top:0;
+    width:100%;
+    z-index:999;
+    background:#071224;
+    border-bottom:1px solid rgba(96,165,250,0.12);
+}
+
+.nav-inner{
+    max-width:1200px;
+    margin:auto;
+    padding:18px 20px;
+    display:flex;
+    justify-content:center;
+}
+
+.nav-links a{
+    color:#cbd5e1;
+    text-decoration:none;
+    font-size:18px;
+}
+
+/* MAIN */
+.page-wrap{
+    max-width:1200px;
+    margin:auto;
+    padding:30px 20px 60px;
+}
+
+/* HEADLINE */
+.section-head{
+    text-align:center;
+    margin-bottom:35px;
+}
+
+.section-head h2{
+    font-size:42px;
+    margin-bottom:10px;
+}
+
+.section-head span{
+    color:#cbd5e1;
+    font-size:18px;
+}
+
+/* BLOG GRID */
+.blog-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:25px;
+}
+
+/* LEER GELASSEN - später durch Upload befüllt */
+.blog-card{
+    display:none;
+}
+
+/* FOOTER */
+footer{
+    font-size:11px;
+    text-align:center;
+    margin-top:50px;
+    padding-bottom:25px;
+    color:#777;
+}
+
+footer a{
+    color:#777;
+    text-decoration:none;
+}
+
+/* MOBILE */
+@media(max-width:700px){
+
+.section-head h2{
+    font-size:34px;
+}
+
+.section-head span{
+    font-size:17px;
+}
+
+.nav-links a{
+    font-size:17px;
+}
+
+}
+</style>
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="nav-inner">
+        <nav class="nav-links">
+            <a href="index.html">Home</a>
+        </nav>
+    </div>
+</header>
+
+<main class="page-wrap">
+
+    <div class="section-head">
+        <h2>Neueste Beiträge</h2>
+        <span>Beiträge folgen bald</span>
+    </div>
+
+    <section class="blog-grid" id="blogGrid">
+        <!-- HIER kommen später automatisch neue Blog Beiträge rein -->
+    </section>
+
+</main>
+
+<footer>
+    <a href="rechtliches.html">
+        Rechtliches/Datenschutz/Impressum
+    </a>
+</footer>
+
+</body>
+</html>
