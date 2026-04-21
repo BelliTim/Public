@@ -366,6 +366,8 @@ async function filesToCompressedBase64(files) {
         const base64 = await compressImage(file);
 images.push(base64);
 }
+return images;
+}
 
 /* UPLOAD */
 async function uploadBlog() {
