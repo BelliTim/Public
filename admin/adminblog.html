@@ -405,7 +405,7 @@ async function uploadBlog() {
 
     try {
         status.textContent = "Upload läuft...";
-
+console.log(images);
         const res = await fetch("/api/upload", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
