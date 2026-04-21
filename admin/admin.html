@@ -172,33 +172,25 @@ button {
 /* LOGIN */
 let PASSWORD = "";
 
-async function login(){
-
+async function login() {
     const pw = document.getElementById("passwordInput").value;
 
     try {
-
-      const res = await fetch("/api/login", {
+        const res = await fetch("/api/login", {
+            method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ password: pw })
         });
 
-        if(res.status === 200){
-
+        if (res.status === 200) {
             PASSWORD = pw;
-
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("adminPanel").style.display = "block";
-
             loadEntries();
-
         } else {
-
             document.getElementById("error").innerText = "Falsches Passwort";
-
         }
-
-    } catch(e){
+    } catch (e) {
         alert("Fehler: " + e);
     }
 }
