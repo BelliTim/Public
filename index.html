@@ -8,93 +8,67 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="Styles.css">
-
 </head>
 
 <body>
 
 <nav>
-<div><a href="#fussball">Fussball</a></div>
-<div><a href="#home">Home</a></div>
-<div><a href="#garage">Garage</a></div>
+    <div><a href="#fussball">Fussball</a></div>
+    <div><a href="#home">Home</a></div>
+    <div><a href="#garage">Garage</a></div>
 </nav>
 
 <section class="hero" id="home">
-<h1>Willkommen</h1>
-<p class="hero-text">
-Hier gibt es einen kleinen Einblick in mein Leben,<br>
-alles was mich interessiert & ich teilen will.
-</p>
+    <h1>Willkommen</h1>
+    <p class="hero-text">
+        Hier gibt es einen kleinen Einblick in mein Leben,<br>
+        alles was mich interessiert & ich teilen will.
+    </p>
 </section>
 
 <!-- ⚽ FUSSBALL -->
 <section id="fussball" style="padding:50px; text-align:center;">
-<h2>Fußball</h2>
+    <h2>Fußball</h2>
 
-<h3>Trikots</h3>
-<div class="grid" id="trikots-container"></div>
+    <h3>Trikots</h3>
+    <div class="grid" id="trikots-container"></div>
 
-<h3 style="margin-top:40px;">Spiele</h3>
-<div class="cards" id="spiele-container"></div>
+    <h3 style="margin-top:40px;">Spiele</h3>
+    <div class="cards" id="spiele-container"></div>
 </section>
 
 <!-- 🚗 GARAGE -->
 <section class="section" id="garage">
+    <h2>Garage</h2>
 
-<h2>Garage</h2>
+    <div class="garage-container">
+        <div class="garage-column">
+            <h3>Aktuell</h3>
+            <div id="garageAktuell"></div>
+        </div>
 
-<div class="garage-container">
-
-<!-- AKTUELL -->
-<div class="garage-column">
-<h3>Aktuell</h3>
-<div id="garageAktuell"></div>
-</div>
-
-<!-- ALT -->
-<div class="garage-column">
-<h3>Alt</h3>
-<div id="garageAlt"></div>
-</div>
-
-</div>
-
+        <div class="garage-column">
+            <h3>Alt</h3>
+            <div id="garageAlt"></div>
+        </div>
+    </div>
 </section>
 
 <footer style="font-size:11px;text-align:center;margin-top:40px;color:#777;">
-<a href="rechtliches.html" style="color:#777;text-decoration:none;">
-Rechtliches/Datenschutz/Impressum
-</a>
+    <a href="rechtliches.html" style="color:#777;text-decoration:none;">
+        Rechtliches/Datenschutz/Impressum
+    </a>
 </footer>
 
-  
 <script>
-
 // =========================
-// 🚗 GARAGE SLIDER (oben bleibt gleich)
+// Hilfsfunktion für altes + neues Format
 // =========================
-document.querySelectorAll(".slider-garage").forEach(slider => {
-
-let slides = slider.querySelectorAll(".slide");
-let index = 0;
-
-function showSlide(i){
-    slides.forEach(s => s.classList.remove("active"));
-    slides[i].classList.add("active");
+function getImageList(item) {
+    if (Array.isArray(item.images)) return item.images;
+    if (item.image) return [item.image];
+    return [];
 }
-
-slider.querySelector(".next").onclick = () => {
-    index = (index + 1) % slides.length;
-    showSlide(index);
-};
-
-slider.querySelector(".prev").onclick = () => {
-    index = (index - 1 + slides.length) % slides.length;
-    showSlide(index);
-};
-
-});
-
 
 // =========================
 // ⚽ TRIKOTS LADEN
@@ -106,18 +80,22 @@ async function loadTrikots() {
 
         const container = document.getElementById("trikots-container");
 
-        container.innerHTML = data.map(item => `
-            <img src="${item.image}" alt="${item.title}">
-        `).join("");
+        container.innerHTML = data.map(item => {
+            const imageList = getImageList(item);
+            const firstImage = imageList[0] || "";
+
+            return `
+                <img src="${firstImage}" alt="${item.title || ""}">
+            `;
+        }).join("");
 
     } catch {
         console.log("Fehler bei Trikots");
     }
 }
 
-
 // =========================
-// ⚽ SPIELE LADEN (mit Slider)
+// ⚽ SPIELE LADEN
 // =========================
 async function loadSpiele() {
     try {
@@ -126,25 +104,27 @@ async function loadSpiele() {
 
         const container = document.getElementById("spiele-container");
 
-        container.innerHTML = data.map((item, i) => `
-            <div class="card">
+        container.innerHTML = data.map(item => {
+            const imageList = getImageList(item);
 
-                <div class="card-slider">
-                    ${item.images.map((img, index) => `
-                        <img src="${img}" class="${index === 0 ? 'active' : ''}">
-                    `).join("")}
+            return `
+                <div class="card">
+                    <div class="card-slider">
+                        ${imageList.map((img, index) => `
+                            <img src="${img}" class="${index === 0 ? 'active' : ''}" alt="${item.title || ""}">
+                        `).join("")}
 
-                    ${item.images.length > 1 ? `
-                        <button class="prev">❮</button>
-                        <button class="next">❯</button>
-                    ` : ""}
+                        ${imageList.length > 1 ? `
+                            <button class="prev">❮</button>
+                            <button class="next">❯</button>
+                        ` : ""}
+                    </div>
+
+                    <h3>${item.title || ""}</h3>
+                    <p>${item.comment || item.description || ""}</p>
                 </div>
-
-                <h3>${item.title}</h3>
-                <p>${item.comment}</p>
-
-            </div>
-        `).join("");
+            `;
+        }).join("");
 
         initCardSliders();
 
@@ -152,7 +132,6 @@ async function loadSpiele() {
         console.log("Fehler bei Spiele");
     }
 }
-
 
 // =========================
 // 🚗 GARAGE LADEN
@@ -164,108 +143,57 @@ async function loadGarage(type, containerId) {
 
         const container = document.getElementById(containerId);
 
-        container.innerHTML = data.map(item => `
-            <div class="garage-entry">
-                <h4>${item.title}</h4>
-                <p>${item.description}</p>
+        container.innerHTML = data.map(item => {
+            const imageList = getImageList(item);
 
-                ${item.images.map(img => `
-                    <img src="${img}">
-                `).join("")}
-            </div>
-        `).join("");
+            return `
+                <div class="garage-entry">
+                    <h4>${item.title || ""}</h4>
+                    <p>${item.comment || item.description || ""}</p>
+
+                    ${imageList.map(img => `
+                        <img src="${img}" alt="${item.title || ""}">
+                    `).join("")}
+                </div>
+            `;
+        }).join("");
 
     } catch {
         console.log("Fehler bei", type);
     }
 }
 
-
 // =========================
 // 🎞️ SLIDER für SPIELE
 // =========================
 function initCardSliders() {
-
     document.querySelectorAll(".card-slider").forEach(slider => {
-
         let slides = slider.querySelectorAll("img");
         let index = 0;
 
         const next = slider.querySelector(".next");
         const prev = slider.querySelector(".prev");
 
-        function show(i){
+        function show(i) {
             slides.forEach(s => s.classList.remove("active"));
             slides[i].classList.add("active");
         }
 
-        if(next){
+        if (next) {
             next.onclick = () => {
                 index = (index + 1) % slides.length;
                 show(index);
             };
         }
 
-        if(prev){
+        if (prev) {
             prev.onclick = () => {
                 index = (index - 1 + slides.length) % slides.length;
                 show(index);
             };
         }
-
     });
-
 }
-
-
-// =========================
-// 🔐 ADMIN (kann bleiben)
-// =========================
-function addEntry(){
-
-const titel = document.getElementById("titel").value;
-const beschreibung = document.getElementById("beschreibung").value;
-const bilder = document.getElementById("bilder").files;
-const kategorie = document.getElementById("kategorie").value;
-
-const container = document.getElementById(kategorie);
-
-const entry = document.createElement("div");
-entry.className = "garage-entry";
-
-entry.innerHTML = `<h4>${titel}</h4><p>${beschreibung}</p>`;
-
-let count = 0;
-
-for(let file of bilder){
-
-if(count >= 10) break;
-
-const reader = new FileReader();
-
-reader.onload = function(e){
-const img = document.createElement("img");
-img.src = e.target.result;
-entry.appendChild(img);
-}
-
-reader.readAsDataURL(file);
-count++;
-
-}
-
-container.appendChild(entry);
-}
-
-function checkPassword(){
-const password = document.getElementById("passwordInput").value;
-if(password === "astra"){
-document.getElementById("passwordOverlay").style.display = "none";
-}else{
-document.getElementById("error").innerText = "Falsches Passwort";
-}
-}
-
 
 // =========================
 // 🚀 START
@@ -274,7 +202,7 @@ loadTrikots();
 loadSpiele();
 loadGarage("garageAktuell", "garageAktuell");
 loadGarage("garageAlt", "garageAlt");
-
 </script>
+
 </body>
 </html>
