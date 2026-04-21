@@ -170,13 +170,39 @@ button {
 
 
 /* LOGIN */
+let PASSWORD = "";
 
-const res = await fetch("https://tbellinghausen.de/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ password: pw })
-});
-    
+async function login(){
+
+    const pw = document.getElementById("passwordInput").value;
+
+    try {
+
+        const res = await fetch("https://tbellinghausen.de/api/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: pw })
+        });
+
+        if(res.status === 200){
+
+            PASSWORD = pw;
+
+            document.getElementById("loginOverlay").style.display = "none";
+            document.getElementById("adminPanel").style.display = "block";
+
+            loadEntries();
+
+        } else {
+
+            document.getElementById("error").innerText = "Falsches Passwort";
+
+        }
+
+    } catch(e){
+        alert("Fehler: " + e);
+    }
+}
 /* UPLOAD */
 
 async function upload(){
