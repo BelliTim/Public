@@ -350,37 +350,21 @@ async function compressImage(file) {
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-            canvas.toBlob(blob => {
-                resolve(new File(
-                    [blob],
-                    file.name.replace(/\.[^.]+$/, "") + ".jpg",
-                    { type: "image/jpeg" }
-                ));
-            }, "image/jpeg", 0.7);
+            const base64 = canvas.toDataURL("image/jpeg", 0.75);
+            resolve(base64);
         };
 
         reader.readAsDataURL(file);
     });
 }
-
 async function filesToCompressedBase64(files) {
     let images = [];
 
     for (let file of files) {
         if (images.length >= 10) break;
 
-        const compressed = await compressImage(file);
-
-        const base64 = await new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = e => resolve(e.target.result);
-            reader.readAsDataURL(compressed);
-        });
-
-        images.push(base64);
-    }
-
-    return images;
+        const base64 = await compressImage(file);
+images.push(base64);
 }
 
 /* UPLOAD */
