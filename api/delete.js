@@ -18,6 +18,11 @@ export default async function handler(req, res) {
     };
 
     const fileName = fileMap[type];
+
+    if (!fileName) {
+        return res.status(400).json({ message: "Ungültige Kategorie" });
+    }
+
     const path = `content/${fileName}`;
 
     const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
@@ -25,32 +30,46 @@ export default async function handler(req, res) {
 
     try {
 
-        // 📥 JSON laden
+        // JSON laden
         const getRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
             headers: {
                 Authorization: `Bearer ${GITHUB_TOKEN}`
             }
         });
 
+        if (getRes.status !== 200) {
+            return res.status(500).json({ message: "Datei nicht gefunden" });
+        }
+
         const fileData = await getRes.json();
         const sha = fileData.sha;
 
         let data = JSON.parse(
-            Buffer.from(fileData.content, "base64").toString()
+            Buffer.from(fileData.content, "base64").toString("utf8")
         );
 
         const entry = data[index];
 
-        // 🔥 BILDER LÖSCHEN
-        for (let img of entry.images) {
+        if (!entry) {
+            return res.status(400).json({ message: "Eintrag nicht gefunden" });
+        }
 
-            // 👉 URL in GitHub Pfad umwandeln
-            const imagePath = img.replace(
-                "https://cdn.jsdelivr.net/gh/BelliTim/Public@main/",
-                ""
-            );
+        // 🔥 Bilder sicher sammeln
+        let images = [];
 
-            // 📥 SHA holen
+        if (Array.isArray(entry.images)) {
+            images = entry.images;
+        } else if (entry.image) {
+            images = [entry.image];
+        }
+
+        // Bilder löschen
+        for (let img of images) {
+
+            let imagePath = img
+                .replace("https://cdn.jsdelivr.net/gh/BelliTim/Public@main/", "")
+                .replace("/content/", "content/");
+
             const imgRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
                 headers: {
                     Authorization: `Bearer ${GITHUB_TOKEN}`
@@ -61,7 +80,6 @@ export default async function handler(req, res) {
 
             const imgData = await imgRes.json();
 
-            // ❌ löschen
             await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
                 method: "DELETE",
                 headers: {
@@ -75,14 +93,15 @@ export default async function handler(req, res) {
             });
         }
 
-        // 🗑️ Eintrag entfernen
+        // Eintrag löschen
         data.splice(index, 1);
 
         const updated = Buffer.from(
-            JSON.stringify(data, null, 2)
+            JSON.stringify(data, null, 2),
+            "utf8"
         ).toString("base64");
 
-        await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+        const saveRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${GITHUB_TOKEN}`,
@@ -94,6 +113,10 @@ export default async function handler(req, res) {
                 sha
             })
         });
+
+        if (saveRes.status !== 200 && saveRes.status !== 201) {
+            return res.status(500).json({ message: "Speichern fehlgeschlagen" });
+        }
 
         return res.status(200).json({ message: "Gelöscht ✅" });
 
