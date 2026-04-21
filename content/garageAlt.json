@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "title": "Opel Corsa C",
+    "comment": "Baujahr: 2002\nMotor: 1.2\nPS: 69\nSonderausstattung: Schiebedach",
+    "images": [
+      "/content/images/img_1776771301298_0.jpg",
+      "/content/images/img_1776771302185_1.jpg",
+      "/content/images/img_1776771302962_2.jpg",
+      "/content/images/img_1776771303692_3.jpg",
+      "/content/images/img_1776771304365_4.jpg"
+    ]
+  }
+]
