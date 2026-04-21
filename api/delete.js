@@ -65,33 +65,43 @@ export default async function handler(req, res) {
 
         // Bilder löschen
         for (let img of images) {
+    try {
 
-            let imagePath = img
-                .replace("https://cdn.jsdelivr.net/gh/BelliTim/Public@main/", "")
-                .replace("/content/", "content/");
+        let imagePath = img;
 
-            const imgRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
-                headers: {
-                    Authorization: `Bearer ${GITHUB_TOKEN}`
-                }
-            });
+        imagePath = imagePath.replace(
+            "https://cdn.jsdelivr.net/gh/BelliTim/Public@main/",
+            ""
+        );
 
-            if (imgRes.status !== 200) continue;
+        imagePath = imagePath.replace(/^\/+/, "");
 
-            const imgData = await imgRes.json();
+        const imgRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
+            headers: {
+                Authorization: `Bearer ${GITHUB_TOKEN}`
+            }
+        });
 
-            await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${GITHUB_TOKEN}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    message: "Bild gelöscht",
-                    sha: imgData.sha
-                })
-            });
-        }
+        if (imgRes.status !== 200) continue;
+
+        const imgData = await imgRes.json();
+
+        await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${GITHUB_TOKEN}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: "Bild gelöscht",
+                sha: imgData.sha
+            })
+        });
+
+    } catch (e) {
+        console.log("Bild konnte nicht gelöscht werden:", img);
+    }
+}
 
         // Eintrag löschen
         data.splice(index, 1);
