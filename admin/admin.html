@@ -175,14 +175,12 @@ async function login(){
 
     const pw = document.getElementById("passwordInput").value;
 
+    const formData = new FormData();
+    formData.append("password", pw);
+
     const res = await fetch("https://tbellinghausen.de/api/login", {
-
-        method:"POST",
-
-        headers:{ "Content-Type":"application/json" },
-
-        body: JSON.stringify({ password: pw })
-
+        method: "POST",
+        body: formData
     });
 
     if(res.status === 200){
@@ -190,7 +188,6 @@ async function login(){
         PASSWORD = pw;
 
         document.getElementById("loginOverlay").style.display = "none";
-
         document.getElementById("adminPanel").style.display = "block";
 
         loadEntries();
@@ -200,7 +197,6 @@ async function login(){
         document.getElementById("error").innerText = "Falsches Passwort";
 
     }
-
 }
 
 /* UPLOAD */
