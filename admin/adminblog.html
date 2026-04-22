@@ -467,6 +467,7 @@ async function loadBlogEntries() {
 
         container.innerHTML = data.map((item, i) => {
             const imageList = getImageList(item);
+            const encodedExistingImages = encodeURIComponent(JSON.stringify(imageList));
             const safeTitle = escapeHtml(item.title || "");
             const safeDateRange = escapeHtml(item.dateRange || item.date || "");
             const safeComment = escapeHtml(item.comment || item.description || "");
@@ -501,11 +502,12 @@ async function loadBlogEntries() {
                         <input value="${safeDateRange}" id="dateRange-${i}" placeholder="Datum / Zeitspanne">
                         <textarea id="comment-${i}" placeholder="Kommentar">${safeComment}</textarea>
 
-                        <div class="file-picker-row">
-                            <label for="file-${i}" class="file-label">Neue Bilder auswählen</label>
-                            <input type="file" id="file-${i}" class="file-input" multiple accept="image/*">
-                            <div class="file-name" id="fileName-${i}">Keine Dateien ausgewählt</div>
-                        </div>
+                       <div class="file-picker-row">
+    <label for="file-${i}" class="file-label">Neue Bilder auswählen</label>
+    <input type="file" id="file-${i}" class="file-input" multiple accept="image/*">
+    <input type="hidden" id="existingImages-${i}" value="${encodedExistingImages}">
+    <div class="file-name" id="fileName-${i}">Keine Dateien ausgewählt</div>
+</div>
 
                         <div class="row">
                             <button type="button" onclick="saveBlogEdit(${i})">💾 Speichern</button>
