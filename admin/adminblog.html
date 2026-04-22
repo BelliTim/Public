@@ -468,7 +468,8 @@ async function loadBlogEntries() {
         const container = document.getElementById("entries");
 
         container.innerHTML = data.map((item, i) => {
-            const entryId = item.id || "";
+           const imageList = getImageList(item);
+             const entryId = item.id || "";
             const encodedExistingImages = encodeURIComponent(JSON.stringify(imageList));
             const safeTitle = escapeHtml(item.title || "");
             const safeDateRange = escapeHtml(item.dateRange || item.date || "");
