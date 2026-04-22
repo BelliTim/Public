@@ -1,3 +1,102 @@
+function createEntryId() {
+    return `entry_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function ensureIds(data) {
+    if (!Array.isArray(data)) return [];
+    return data.map(item => {
+        if (item && typeof item === "object" && !item.id) {
+            return { ...item, id: createEntryId() };
+        }
+        return item;
+    });
+}
+
+async function githubGetJson({ repo, path, token }) {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github+json"
+        }
+    });
+
+    if (res.status === 404) {
+        return { data: [], sha: null };
+    }
+
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`JSON laden fehlgeschlagen: ${err}`);
+    }
+
+    const fileData = await res.json();
+    const decoded = Buffer.from(
+        String(fileData.content || "").replace(/\n/g, ""),
+        "base64"
+    ).toString("utf8");
+
+    let parsed = JSON.parse(decoded);
+    parsed = ensureIds(Array.isArray(parsed) ? parsed : []);
+
+    return {
+        data: parsed,
+        sha: fileData.sha || null
+    };
+}
+
+async function githubSaveJson({ repo, path, token, data, sha, message }) {
+    const contentBase64 = Buffer.from(
+        JSON.stringify(data, null, 2),
+        "utf8"
+    ).toString("base64");
+
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        method: "PUT",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/vnd.github+json"
+        },
+        body: JSON.stringify({
+            message,
+            content: contentBase64,
+            sha
+        })
+    });
+
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`JSON speichern fehlgeschlagen: ${err}`);
+    }
+
+    return await res.json();
+}
+
+async function githubUploadBase64Image({ repo, token, base64, prefix = "img" }) {
+    const fileName = `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const imagePath = `content/images/${fileName}`;
+
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${imagePath}`, {
+        method: "PUT",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/vnd.github+json"
+        },
+        body: JSON.stringify({
+            message: `Bild Upload ${fileName}`,
+            content: base64
+        })
+    });
+
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`Bild Upload fehlgeschlagen: ${err}`);
+    }
+
+    return `/content/images/${fileName}`;
+}
+
 export default async function handler(req, res) {
     if (req.method !== "POST") {
         return res.status(405).json({ message: "Nur POST erlaubt" });
@@ -37,107 +136,56 @@ export default async function handler(req, res) {
     try {
         const imagePaths = [];
 
-        // 1) Bilder hochladen
         for (let i = 0; i < images.length && i < 10; i++) {
             const image = images[i];
-
-            if (typeof image !== "string" || !image.includes(",")) {
-                continue;
-            }
+            if (typeof image !== "string" || !image.includes(",")) continue;
 
             const base64 = image.split(",")[1];
-            const fileNameImg = `img_${Date.now()}_${i}.jpg`;
-            const imagePath = `content/images/${fileNameImg}`;
-
-            const uploadRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
-                method: "PUT",
-                headers: {
-                    Authorization: `Bearer ${GITHUB_TOKEN}`,
-                    "Content-Type": "application/json",
-                    "Accept": "application/vnd.github+json"
-                },
-                body: JSON.stringify({
-                    message: "Bild Upload",
-                    content: base64
-                })
+            const path = await githubUploadBase64Image({
+                repo: REPO,
+                token: GITHUB_TOKEN,
+                base64,
+                prefix: "img"
             });
-
-            if (!uploadRes.ok) {
-                const err = await uploadRes.text();
-                console.error("Bild Upload fehlgeschlagen:", err);
-                return res.status(500).json({ message: "Bild Upload fehlgeschlagen" });
-            }
-
-            imagePaths.push(`/content/images/${fileNameImg}`);
+            imagePaths.push(path);
         }
 
         if (imagePaths.length === 0) {
             return res.status(400).json({ message: "Keine gültigen Bilder" });
         }
 
-        // 2) JSON laden
-        const getRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
-            headers: {
-                Authorization: `Bearer ${GITHUB_TOKEN}`,
-                "Accept": "application/vnd.github+json"
-            }
+        const { data, sha } = await githubGetJson({
+            repo: REPO,
+            path: jsonPath,
+            token: GITHUB_TOKEN
         });
 
-        let data = [];
-        let sha = null;
-
-        if (getRes.status === 200) {
-            const fileData = await getRes.json();
-            sha = fileData.sha || null;
-
-            const decoded = Buffer.from(
-                String(fileData.content || "").replace(/\n/g, ""),
-                "base64"
-            ).toString("utf8");
-
-            const parsed = JSON.parse(decoded);
-            data = Array.isArray(parsed) ? parsed : [];
-        } else if (getRes.status !== 404) {
-            const err = await getRes.text();
-            console.error("JSON laden fehlgeschlagen:", err);
-            return res.status(500).json({ message: "JSON laden fehlgeschlagen" });
-        }
-
-        // 3) Eintrag hinzufügen
-        data.unshift({
+        const newEntry = {
+            id: createEntryId(),
             title: safeTitle,
-            dateRange: safeDateRange,
             comment: safeComment,
             images: imagePaths
-        });
+        };
 
-        const updated = Buffer.from(
-            JSON.stringify(data, null, 2),
-            "utf8"
-        ).toString("base64");
-
-        // 4) JSON speichern
-        const saveRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
-            method: "PUT",
-            headers: {
-                Authorization: `Bearer ${GITHUB_TOKEN}`,
-                "Content-Type": "application/json",
-                "Accept": "application/vnd.github+json"
-            },
-            body: JSON.stringify({
-                message: "Neuer Eintrag",
-                content: updated,
-                sha
-            })
-        });
-
-        if (!saveRes.ok) {
-            const err = await saveRes.text();
-            console.error("JSON speichern fehlgeschlagen:", err);
-            return res.status(500).json({ message: "JSON speichern fehlgeschlagen" });
+        if (category === "blog") {
+            newEntry.dateRange = safeDateRange;
         }
 
-        return res.status(200).json({ message: "Upload erfolgreich 🚀" });
+        data.unshift(newEntry);
+
+        await githubSaveJson({
+            repo: REPO,
+            path: jsonPath,
+            token: GITHUB_TOKEN,
+            data,
+            sha,
+            message: "Neuer Eintrag"
+        });
+
+        return res.status(200).json({
+            message: "Upload erfolgreich 🚀",
+            id: newEntry.id
+        });
     } catch (err) {
         console.error("Serverfehler in upload.js:", err);
         return res.status(500).json({ message: "Serverfehler" });
