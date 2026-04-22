@@ -472,22 +472,23 @@ async function loadBlogEntries() {
 let entryId = item.id || "";
 let encodedExistingImages = encodeURIComponent(JSON.stringify(imageList));
             const safeTitle = escapeHtml(item.title || "");
-            const safeDateRange = escapeHtml(item.dateRange || item.date || "");
-            const safeComment = escapeHtml(item.comment || item.description || "");
+const safeDateRange = escapeHtml(item.dateRange || item.date || "");
+const safeComment = escapeHtml(item.comment || item.description || "");
 
-            return `
-                <div class="card">
-                    <div class="slider" id="slider-${i}">
-                        ${imageList.length
-                            ? imageList.map((img, j) => `
-                                <img src="${img}" class="${j === 0 ? "active" : ""}" alt="${safeTitle}">
-                              `).join("")
-                            : `<img src="data:image/svg+xml;utf8,
-                            <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='600'>
-                              <rect width='100%' height='100%' fill='%230b1220'/>
-                              <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='34'>Kein Bild</text>
-                            </svg>" class="active" alt="Kein Bild">`
-                        }
+const sliderHtml = imageList.length
+    ? imageList.map((img, j) => `
+        <img src="${img}" class="${j === 0 ? "active" : ""}" alt="${safeTitle}">
+      `).join("")
+    : `<img src="data:image/svg+xml;utf8,
+        <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='600'>
+          <rect width='100%' height='100%' fill='%230b1220'/>
+          <text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='white' font-size='34'>Kein Bild</text>
+        </svg>" class="active" alt="Kein Bild">`;
+
+return `
+    <div class="card">
+        <div class="slider" id="slider-${i}">
+            ${sliderHtml}
 
                         <button class="prev" type="button">❮</button>
                         <button class="next" type="button">❯</button>
