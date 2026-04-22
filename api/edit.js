@@ -3,7 +3,16 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: "Nur POST erlaubt" });
     }
 
-    const { type, index, title, comment, images, password } = req.body;
+    const {
+        type,
+        index,
+        title,
+        comment,
+        dateRange,
+        images,
+        existingImages,
+        password
+    } = req.body;
 
     if (password !== process.env.ADMIN_PASSWORD) {
         return res.status(401).json({ message: "Kein Zugriff" });
@@ -15,7 +24,6 @@ export default async function handler(req, res) {
         garageAktuell: "garageAktuell.json",
         garageAlt: "garageAlt.json",
         blog: "blog.json"
-        
     };
 
     const fileName = fileMap[type];
@@ -28,7 +36,6 @@ export default async function handler(req, res) {
     const jsonPath = `content/${fileName}`;
 
     try {
-        // JSON-Datei laden
         const fileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
             headers: {
                 Authorization: `Bearer ${GITHUB_TOKEN}`
@@ -47,56 +54,108 @@ export default async function handler(req, res) {
             Buffer.from(fileData.content, "base64").toString("utf8")
         );
 
-        if (!content[index]) {
+        const i = Number(index);
+
+        if (isNaN(i) || !content[i]) {
             return res.status(400).json({ message: "Eintrag nicht gefunden" });
         }
 
-        // Text aktualisieren
-        content[index].title = title;
-        content[index].comment = comment;
+        content[i].title = title;
+        content[i].comment = comment;
 
-        // Falls neue Bilder mitgegeben wurden:
-        // Base64-Bilder erst als echte Dateien zu GitHub hochladen
-        if (Array.isArray(images) && images.length > 0) {
-            const imagePaths = [];
+        // Nur Blog hat dateRange
+        if (type === "blog") {
+            content[i].dateRange = dateRange || "";
+        }
 
-            for (let i = 0; i < images.length && i < 10; i++) {
-                const image = images[i];
+        // STANDARD für alte Admin-Seite bleibt erhalten:
+        if (type !== "blog") {
+            if (Array.isArray(images) && images.length > 0) {
+                const imagePaths = [];
 
-                // Nur Base64 Data-URLs akzeptieren
-                if (typeof image !== "string" || !image.includes(",")) {
-                    continue;
+                for (let x = 0; x < images.length && x < 10; x++) {
+                    const image = images[x];
+
+                    if (typeof image !== "string" || !image.includes(",")) {
+                        continue;
+                    }
+
+                    const base64 = image.split(",")[1];
+                    const fileNameImg = `img_${Date.now()}_${x}.jpg`;
+                    const imagePath = `content/images/${fileNameImg}`;
+
+                    const uploadRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
+                        method: "PUT",
+                        headers: {
+                            Authorization: `Bearer ${GITHUB_TOKEN}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            message: "Bild bei Bearbeitung ersetzt",
+                            content: base64
+                        })
+                    });
+
+                    if (uploadRes.status !== 201) {
+                        const err = await uploadRes.text();
+                        console.error("Bild-Upload fehlgeschlagen:", err);
+                        return res.status(500).json({ message: "Bild-Upload fehlgeschlagen" });
+                    }
+
+                    imagePaths.push(`/content/images/${fileNameImg}`);
                 }
 
-                const base64 = image.split(",")[1];
-                const fileNameImg = `img_${Date.now()}_${i}.jpg`;
-                const imagePath = `content/images/${fileNameImg}`;
-
-                const uploadRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
-                    method: "PUT",
-                    headers: {
-                        Authorization: `Bearer ${GITHUB_TOKEN}`,
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        message: "Bild bei Bearbeitung ersetzt",
-                        content: base64
-                    })
-                });
-
-                if (uploadRes.status !== 201) {
-                    const err = await uploadRes.text();
-                    console.error("Bild-Upload fehlgeschlagen:", err);
-                    return res.status(500).json({ message: "Bild-Upload fehlgeschlagen" });
+                if (imagePaths.length > 0) {
+                    content[i].images = imagePaths;
                 }
+            }
+        }
 
-                imagePaths.push(`/content/images/${fileNameImg}`);
+        // BLOG SPEZIAL: alte Bilder behalten + neue ergänzen
+        if (type === "blog") {
+            let keptImages = Array.isArray(existingImages)
+                ? existingImages.filter(img => typeof img === "string" && img.trim() !== "")
+                : (Array.isArray(content[i].images) ? content[i].images : []);
+
+            const newImagePaths = [];
+
+            if (Array.isArray(images) && images.length > 0) {
+                for (let x = 0; x < images.length; x++) {
+                    if (keptImages.length + newImagePaths.length >= 10) break;
+
+                    const image = images[x];
+
+                    if (typeof image !== "string" || !image.includes(",")) {
+                        continue;
+                    }
+
+                    const base64 = image.split(",")[1];
+                    const fileNameImg = `img_${Date.now()}_${x}.jpg`;
+                    const imagePath = `content/images/${fileNameImg}`;
+
+                    const uploadRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
+                        method: "PUT",
+                        headers: {
+                            Authorization: `Bearer ${GITHUB_TOKEN}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            message: "Blog Bild ergänzt",
+                            content: base64
+                        })
+                    });
+
+                    if (uploadRes.status !== 201) {
+                        const err = await uploadRes.text();
+                        console.error("Bild-Upload fehlgeschlagen:", err);
+                        return res.status(500).json({ message: "Bild-Upload fehlgeschlagen" });
+                    }
+
+                    newImagePaths.push(`/content/images/${fileNameImg}`);
+                }
             }
 
-            // Nur ersetzen, wenn wirklich neue Bilder erfolgreich hochgeladen wurden
-            if (imagePaths.length > 0) {
-                content[index].images = imagePaths;
-            }
+            content[i].images = [...keptImages, ...newImagePaths].slice(0, 10);
         }
 
         const updated = Buffer.from(
