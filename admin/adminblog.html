@@ -460,7 +460,7 @@ function initSlider(container) {
 /* LOAD */
 async function loadBlogEntries() {
     try {
-        const res = await fetch(`/content/${BLOG_TYPE}.json?ts=` + Date.now(), {
+        const res = await fetch(`/api/get-content?type=${BLOG_TYPE}&ts=` + Date.now(), {
     cache: "no-store"
 });
         const data = await res.json();
