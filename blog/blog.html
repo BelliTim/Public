@@ -589,9 +589,10 @@ async function loadBlogPosts() {
     showStatus("Blog-Beiträge werden geladen...");
 
     try {
-        const res = await fetch("content/blog.json?ts=" + Date.now(), {
-            cache: "no-store"
-        });
+       const res = await fetch("/content/blog.json?ts=" + Date.now(), {
+    cache: "no-store"
+});
+            
 
         if (!res.ok) {
             grid.innerHTML = "";
