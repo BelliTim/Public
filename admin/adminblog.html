@@ -590,7 +590,7 @@ async function saveBlogEdit(index) {
             return;
         }
 
-        alert(data.message || "Gespeichert");
+        alert("NEUE VERSION AKTIV: " + (data.message || "Gespeichert"));
         loadBlogEntries();
     } catch (e) {
         alert("Fehler beim Speichern: " + e);
