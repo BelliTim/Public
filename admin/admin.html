@@ -439,9 +439,8 @@ async function loadEntries() {
                         <div class="file-name" id="fileName-${i}">Keine Dateien ausgewählt</div>
                     </div>
 
-                    <button onclick="saveEdit('${type}', ${i})">💾 Speichern</button>
-                    <button onclick="deleteEntry('${type}', ${i})">❌ Löschen</button>
-                </div>
+                    <button onclick="saveEdit('${type}', '${item.id || ""}', ${i})">💾 Speichern</button>
+<button onclick="deleteEntry('${type}', '${item.id || ""}', ${i})">❌ Löschen</button></div>
             `;
         }).join("");
 
@@ -464,7 +463,7 @@ async function loadEntries() {
 }
 
 /* EDIT */
-async function saveEdit(type, index) {
+async function saveEdit(type, id, index) {
     const title = document.getElementById(`title-${index}`).value.trim();
     const comment = document.getElementById(`comment-${index}`).value.trim();
     const files = document.getElementById(`file-${index}`).files;
@@ -493,6 +492,7 @@ async function saveEdit(type, index) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 type,
+                id,
                 index,
                 title,
                 comment,
@@ -510,7 +510,7 @@ async function saveEdit(type, index) {
 }
 
 /* DELETE */
-async function deleteEntry(type, index) {
+async function deleteEntry(type, id, index) {
     if (!confirm("Löschen?")) return;
 
     try {
@@ -519,6 +519,7 @@ async function deleteEntry(type, index) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 type,
+                id,
                 index,
                 password: PASSWORD
             })
