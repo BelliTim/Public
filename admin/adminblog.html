@@ -551,7 +551,7 @@ async function saveBlogEdit(id, index) {
 
     let existingImages = [];
     try {
-        const currentRes = await fetch(`/content/${BLOG_TYPE}.json?ts=` + Date.now(), { cache: "no-store" });
+        const currentRes = await fetch(`/api/get-content?type=${BLOG_TYPE}&ts=` + Date.now(), { cache: "no-store" });
         const currentData = await currentRes.json();
 
         let currentEntry = null;
