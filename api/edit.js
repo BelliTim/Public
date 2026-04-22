@@ -12,7 +12,7 @@ export default async function handler(req, res) {
         images,
         existingImages,
         password
-    } = req.body;
+    } = req.body || {};
 
     if (password !== process.env.ADMIN_PASSWORD) {
         return res.status(401).json({ message: "Kein Zugriff" });
@@ -38,37 +38,35 @@ export default async function handler(req, res) {
     try {
         const fileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
             headers: {
-                Authorization: `Bearer ${GITHUB_TOKEN}`
+                Authorization: `Bearer ${GITHUB_TOKEN}`,
+                "Accept": "application/vnd.github+json"
             }
         });
 
-        if (fileRes.status !== 200) {
+        if (!fileRes.ok) {
             const err = await fileRes.text();
             console.error("JSON laden fehlgeschlagen:", err);
             return res.status(500).json({ message: "Datei nicht gefunden" });
         }
 
         const fileData = await fileRes.json();
-
         const content = JSON.parse(
-            Buffer.from(fileData.content, "base64").toString("utf8")
+            Buffer.from(String(fileData.content || "").replace(/\n/g, ""), "base64").toString("utf8")
         );
 
         const i = Number(index);
-
-        if (isNaN(i) || !content[i]) {
+        if (!Array.isArray(content) || isNaN(i) || !content[i]) {
             return res.status(400).json({ message: "Eintrag nicht gefunden" });
         }
 
-        content[i].title = title;
-        content[i].comment = comment;
+        content[i].title = String(title ?? "").trim();
+        content[i].comment = String(comment ?? "").trim();
 
-        // Nur Blog hat dateRange
         if (type === "blog") {
-            content[i].dateRange = dateRange || "";
+            content[i].dateRange = String(dateRange ?? "").trim();
         }
 
-        // STANDARD für alte Admin-Seite bleibt erhalten:
+        // Für alle Nicht-Blog-Bereiche: neue Bilder ersetzen alte Bilder
         if (type !== "blog") {
             if (Array.isArray(images) && images.length > 0) {
                 const imagePaths = [];
@@ -88,7 +86,8 @@ export default async function handler(req, res) {
                         method: "PUT",
                         headers: {
                             Authorization: `Bearer ${GITHUB_TOKEN}`,
-                            "Content-Type": "application/json"
+                            "Content-Type": "application/json",
+                            "Accept": "application/vnd.github+json"
                         },
                         body: JSON.stringify({
                             message: "Bild bei Bearbeitung ersetzt",
@@ -96,7 +95,7 @@ export default async function handler(req, res) {
                         })
                     });
 
-                    if (uploadRes.status !== 201) {
+                    if (!uploadRes.ok) {
                         const err = await uploadRes.text();
                         console.error("Bild-Upload fehlgeschlagen:", err);
                         return res.status(500).json({ message: "Bild-Upload fehlgeschlagen" });
@@ -111,9 +110,9 @@ export default async function handler(req, res) {
             }
         }
 
-        // BLOG SPEZIAL: alte Bilder behalten + neue ergänzen
+        // Blog: alte Bilder behalten + neue ergänzen
         if (type === "blog") {
-            let keptImages = Array.isArray(existingImages)
+            const keptImages = Array.isArray(existingImages)
                 ? existingImages.filter(img => typeof img === "string" && img.trim() !== "")
                 : (Array.isArray(content[i].images) ? content[i].images : []);
 
@@ -137,7 +136,8 @@ export default async function handler(req, res) {
                         method: "PUT",
                         headers: {
                             Authorization: `Bearer ${GITHUB_TOKEN}`,
-                            "Content-Type": "application/json"
+                            "Content-Type": "application/json",
+                            "Accept": "application/vnd.github+json"
                         },
                         body: JSON.stringify({
                             message: "Blog Bild ergänzt",
@@ -145,7 +145,7 @@ export default async function handler(req, res) {
                         })
                     });
 
-                    if (uploadRes.status !== 201) {
+                    if (!uploadRes.ok) {
                         const err = await uploadRes.text();
                         console.error("Bild-Upload fehlgeschlagen:", err);
                         return res.status(500).json({ message: "Bild-Upload fehlgeschlagen" });
@@ -167,7 +167,8 @@ export default async function handler(req, res) {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${GITHUB_TOKEN}`,
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Accept": "application/vnd.github+json"
             },
             body: JSON.stringify({
                 message: "Eintrag bearbeitet",
@@ -176,14 +177,13 @@ export default async function handler(req, res) {
             })
         });
 
-        if (updateRes.status !== 200 && updateRes.status !== 201) {
+        if (!updateRes.ok) {
             const err = await updateRes.text();
             console.error("JSON speichern fehlgeschlagen:", err);
             return res.status(500).json({ message: "Fehler beim Speichern" });
         }
 
         return res.status(200).json({ message: "Bearbeitet ✅" });
-
     } catch (err) {
         console.error("Serverfehler in edit.js:", err);
         return res.status(500).json({ message: "Serverfehler" });
