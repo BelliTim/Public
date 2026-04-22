@@ -548,8 +548,10 @@ async function saveBlogEdit(index) {
 
     let existingImages = [];
     try {
-        const raw = document.getElementById(`existingImages-${index}`)?.value || "[]";
-        existingImages = JSON.parse(decodeURIComponent(raw));
+        const currentRes = await fetch(`/content/${BLOG_TYPE}.json?ts=` + Date.now(), { cache: "no-store" });
+        const currentData = await currentRes.json();
+        const currentEntry = currentData[index];
+        existingImages = Array.isArray(currentEntry?.images) ? currentEntry.images : [];
     } catch (e) {
         existingImages = [];
     }
@@ -582,6 +584,12 @@ async function saveBlogEdit(index) {
         });
 
         const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.message || "Speichern fehlgeschlagen");
+            return;
+        }
+
         alert(data.message || "Gespeichert");
         loadBlogEntries();
     } catch (e) {
