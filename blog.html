@@ -5,11 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blog | Deine Website</title>
 
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
 <style>
 *{
     margin:0;
     padding:0;
     box-sizing:border-box;
+}
+
+html, body{
+    overflow-x:hidden;
 }
 
 body{
@@ -29,7 +37,8 @@ body{
     top:0;
     width:100%;
     z-index:999;
-    background:#071224;
+    background:rgba(7,18,36,0.92);
+    backdrop-filter:blur(10px);
     border-bottom:1px solid rgba(96,165,250,0.12);
 }
 
@@ -45,6 +54,11 @@ body{
     color:#cbd5e1;
     text-decoration:none;
     font-size:18px;
+    transition:0.2s ease;
+}
+
+.nav-links a:hover{
+    color:#ffffff;
 }
 
 /* MAIN */
@@ -79,6 +93,25 @@ body{
     line-height:1.6;
     max-width:680px;
     margin:0 auto;
+}
+
+/* STATUS */
+.blog-status{
+    text-align:center;
+    color:#cbd5e1;
+    margin:0 auto 28px;
+    font-size:1rem;
+    line-height:1.6;
+    max-width:760px;
+    padding:14px 18px;
+    border-radius:18px;
+    background:rgba(15,23,42,0.45);
+    border:1px solid rgba(96,165,250,0.10);
+    display:none;
+}
+
+.blog-status.show{
+    display:block;
 }
 
 /* BLOG GRID */
@@ -129,6 +162,7 @@ body{
     display:none;
     cursor:pointer;
     transition:transform 0.25s ease;
+    -webkit-user-drag:none;
 }
 
 .blog-slider img:hover{
@@ -166,6 +200,7 @@ body{
     border:1px solid rgba(255,255,255,0.12);
     transition:0.2s ease;
     padding:0;
+    font-size:19px;
 }
 
 .blog-slider button:hover{
@@ -209,6 +244,7 @@ body{
     line-height:1.8;
     font-size:1.03rem;
     white-space:pre-line;
+    word-break:break-word;
 }
 
 /* LIGHTBOX */
@@ -255,6 +291,7 @@ body{
     object-fit:contain;
     display:none;
     background:#020617;
+    -webkit-user-drag:none;
 }
 
 .lightbox-track img.active{
@@ -327,6 +364,23 @@ footer a{
         font-size:17px;
     }
 
+    .page-wrap{
+        padding:24px 14px 50px;
+    }
+
+    .blog-grid{
+        grid-template-columns:1fr;
+        gap:22px;
+    }
+
+    .blog-slider{
+        height:240px;
+    }
+
+    .blog-title{
+        font-size:1.45rem;
+    }
+
     .lightbox-inner{
         height:min(72vh, 700px);
         border-radius:18px;
@@ -357,8 +411,10 @@ footer a{
         <p>↓ Neuester Beitrag ↓</p>
     </div>
 
+    <div class="blog-status" id="blogStatus"></div>
+
     <section class="blog-grid" id="blogGrid">
-        <!-- HIER kommen später automatisch neue Blog Beiträge rein -->
+        <!-- Blog-Beiträge werden hier geladen -->
     </section>
 </main>
 
@@ -386,6 +442,24 @@ function escapeHtml(value) {
         .replace(/'/g, "&#039;");
 }
 
+function showStatus(message) {
+    const box = document.getElementById("blogStatus");
+    box.textContent = message;
+    box.classList.add("show");
+}
+
+function hideStatus() {
+    const box = document.getElementById("blogStatus");
+    box.textContent = "";
+    box.classList.remove("show");
+}
+
+function normalizeImagePath(path) {
+    if (!path) return "";
+    if (/^https?:\/\//i.test(path)) return path;
+    return path.startsWith("/") ? path : "/" + path;
+}
+
 function initBlogSlider(container) {
     let index = 0;
     const slides = container.querySelectorAll("img");
@@ -396,7 +470,7 @@ function initBlogSlider(container) {
 
     function show(i) {
         slides.forEach(img => img.classList.remove("active"));
-        slides[i].classList.add("active");
+        if (slides[i]) slides[i].classList.add("active");
     }
 
     if (slides.length <= 1) {
@@ -425,6 +499,8 @@ let touchStartX = 0;
 let touchEndX = 0;
 
 function openLightbox(images, startIndex = 0) {
+    if (!Array.isArray(images) || !images.length) return;
+
     lightboxImages = images;
     lightboxIndex = startIndex;
 
@@ -458,6 +534,8 @@ function moveLightbox(direction) {
     if (!lightboxImages.length) return;
 
     const slides = document.querySelectorAll("#lightboxTrack img");
+    if (!slides.length) return;
+
     slides[lightboxIndex].classList.remove("active");
 
     lightboxIndex += direction;
@@ -488,11 +566,16 @@ function handleTouchEnd(e) {
 async function loadBlogPosts() {
     const grid = document.getElementById("blogGrid");
 
+    showStatus("Blog-Beiträge werden geladen...");
+
     try {
-        const res = await fetch("/content/blog.json");
+        const res = await fetch("content/blog.json?ts=" + Date.now(), {
+            cache: "no-store"
+        });
 
         if (!res.ok) {
             grid.innerHTML = "";
+            showStatus("Blog konnte nicht geladen werden.");
             return;
         }
 
@@ -500,14 +583,19 @@ async function loadBlogPosts() {
 
         if (!Array.isArray(data) || data.length === 0) {
             grid.innerHTML = "";
+            showStatus("Noch keine Blog-Beiträge vorhanden.");
             return;
         }
+
+        hideStatus();
 
         grid.innerHTML = data.map((item, i) => {
             const title = escapeHtml(item.title || "");
             const dateRange = escapeHtml(item.dateRange || item.date || "");
             const comment = escapeHtml(item.comment || "");
-            const images = Array.isArray(item.images) ? item.images : [];
+            const images = Array.isArray(item.images)
+                ? item.images.map(normalizeImagePath).filter(Boolean)
+                : [];
             const encodedImages = encodeURIComponent(JSON.stringify(images));
 
             return `
@@ -522,6 +610,7 @@ async function loadBlogPosts() {
                                         alt="${title}"
                                         data-images="${encodedImages}"
                                         data-index="${j}"
+                                        loading="lazy"
                                     >
                                 `).join("")
                                 : `<img src="data:image/svg+xml;utf8,
@@ -556,6 +645,7 @@ async function loadBlogPosts() {
     } catch (e) {
         console.error("Blog konnte nicht geladen werden:", e);
         grid.innerHTML = "";
+        showStatus("Fehler beim Laden der Blog-Beiträge.");
     }
 }
 
