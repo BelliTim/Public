@@ -468,7 +468,7 @@ async function loadBlogEntries() {
         const container = document.getElementById("entries");
 
         container.innerHTML = data.map((item, i) => {
-            const imageList = getImageList(item);
+            const entryId = item.id || "";
             const encodedExistingImages = encodeURIComponent(JSON.stringify(imageList));
             const safeTitle = escapeHtml(item.title || "");
             const safeDateRange = escapeHtml(item.dateRange || item.date || "");
@@ -496,9 +496,8 @@ async function loadBlogEntries() {
                     <p class="status-text" style="margin:0 0 10px 0;">${safeDateRange}</p>
                     <p class="status-text" style="margin:0 0 10px 0;">${safeComment.replace(/\n/g, "<br>")}</p>
 
-                    <button class="secondary" type="button" onclick="toggleEditBox(${i})">Bearbeiten aufklappen</button>
-                    <button class="danger" type="button" onclick="deleteBlogEntry(${i})">❌ Löschen</button>
-
+                   <button class="secondary" type="button" onclick="toggleEditBox(${i})">Bearbeiten aufklappen</button>
+<button class="danger" type="button" onclick="deleteBlogEntry('${entryId}', ${i})">❌ Löschen</button>
                     <div class="edit-box" id="editBox-${i}">
                         <input value="${safeTitle}" id="title-${i}" placeholder="Titel">
                         <input value="${safeDateRange}" id="dateRange-${i}" placeholder="Datum / Zeitspanne">
@@ -512,7 +511,7 @@ async function loadBlogEntries() {
 </div>
 
                         <div class="row">
-                            <button type="button" onclick="saveBlogEdit(${i})">💾 Speichern</button>
+                          <button type="button" onclick="saveBlogEdit('${entryId}', ${i})">💾 Speichern</button>
                             <button class="secondary" type="button" onclick="toggleEditBox(${i})">Schließen</button>
                         </div>
                     </div>
@@ -537,7 +536,7 @@ async function loadBlogEntries() {
 }
 
 /* EDIT */
-async function saveBlogEdit(index) {
+async function saveBlogEdit(id, index) {
     const title = document.getElementById(`title-${index}`).value.trim();
     const dateRange = document.getElementById(`dateRange-${index}`).value.trim();
     const comment = document.getElementById(`comment-${index}`).value.trim();
@@ -552,7 +551,17 @@ async function saveBlogEdit(index) {
     try {
         const currentRes = await fetch(`/content/${BLOG_TYPE}.json?ts=` + Date.now(), { cache: "no-store" });
         const currentData = await currentRes.json();
-        const currentEntry = currentData[index];
+
+        let currentEntry = null;
+
+        if (id) {
+            currentEntry = currentData.find(item => item && item.id === id) || null;
+        }
+
+        if (!currentEntry && currentData[index]) {
+            currentEntry = currentData[index];
+        }
+
         existingImages = Array.isArray(currentEntry?.images) ? currentEntry.images : [];
     } catch (e) {
         existingImages = [];
@@ -575,6 +584,7 @@ async function saveBlogEdit(index) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 type: BLOG_TYPE,
+                id,
                 index,
                 title,
                 dateRange,
@@ -592,15 +602,14 @@ async function saveBlogEdit(index) {
             return;
         }
 
-        alert("NEUE VERSION AKTIV: " + (data.message || "Gespeichert"));
+        alert(data.message || "Gespeichert");
         loadBlogEntries();
     } catch (e) {
         alert("Fehler beim Speichern: " + e);
     }
 }
-
 /* DELETE */
-async function deleteBlogEntry(index) {
+async function deleteBlogEntry(id, index) {
     if (!confirm("Diesen Blog-Beitrag löschen?")) return;
 
     try {
@@ -609,12 +618,19 @@ async function deleteBlogEntry(index) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 type: BLOG_TYPE,
+                id,
                 index,
                 password: PASSWORD
             })
         });
 
         const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.message || "Löschen fehlgeschlagen");
+            return;
+        }
+
         alert(data.message || "Gelöscht");
         loadBlogEntries();
     } catch (e) {
