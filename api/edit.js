@@ -1,3 +1,111 @@
+function createEntryId() {
+    return `entry_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function ensureIds(data) {
+    if (!Array.isArray(data)) return [];
+    return data.map(item => {
+        if (item && typeof item === "object" && !item.id) {
+            return { ...item, id: createEntryId() };
+        }
+        return item;
+    });
+}
+
+async function githubGetJson({ repo, path, token }) {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github+json"
+        }
+    });
+
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`JSON laden fehlgeschlagen: ${err}`);
+    }
+
+    const fileData = await res.json();
+    const decoded = Buffer.from(
+        String(fileData.content || "").replace(/\n/g, ""),
+        "base64"
+    ).toString("utf8");
+
+    const parsed = ensureIds(JSON.parse(decoded));
+
+    return {
+        data: Array.isArray(parsed) ? parsed : [],
+        sha: fileData.sha || null
+    };
+}
+
+async function githubSaveJson({ repo, path, token, data, sha, message }) {
+    const contentBase64 = Buffer.from(
+        JSON.stringify(data, null, 2),
+        "utf8"
+    ).toString("base64");
+
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        method: "PUT",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/vnd.github+json"
+        },
+        body: JSON.stringify({
+            message,
+            content: contentBase64,
+            sha
+        })
+    });
+
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`JSON speichern fehlgeschlagen: ${err}`);
+    }
+
+    return await res.json();
+}
+
+async function githubUploadBase64Image({ repo, token, base64, prefix = "img" }) {
+    const fileName = `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.jpg`;
+    const imagePath = `content/images/${fileName}`;
+
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${imagePath}`, {
+        method: "PUT",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/vnd.github+json"
+        },
+        body: JSON.stringify({
+            message: `Bild Upload ${fileName}`,
+            content: base64
+        })
+    });
+
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`Bild Upload fehlgeschlagen: ${err}`);
+    }
+
+    return `/content/images/${fileName}`;
+}
+
+function findEntryIndex(data, id, index) {
+    if (id) {
+        const found = data.findIndex(item => item && item.id === id);
+        if (found !== -1) return found;
+    }
+
+    const numericIndex = Number(index);
+    if (!Number.isNaN(numericIndex) && data[numericIndex]) {
+        return numericIndex;
+    }
+
+    return -1;
+}
+
 export default async function handler(req, res) {
     if (req.method !== "POST") {
         return res.status(405).json({ message: "Nur POST erlaubt" });
@@ -5,6 +113,7 @@ export default async function handler(req, res) {
 
     const {
         type,
+        id,
         index,
         title,
         comment,
@@ -36,85 +145,57 @@ export default async function handler(req, res) {
     const jsonPath = `content/${fileName}`;
 
     try {
-        const fileRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
-            headers: {
-                Authorization: `Bearer ${GITHUB_TOKEN}`,
-                "Accept": "application/vnd.github+json"
-            }
+        const { data, sha } = await githubGetJson({
+            repo: REPO,
+            path: jsonPath,
+            token: GITHUB_TOKEN
         });
 
-        if (!fileRes.ok) {
-            const err = await fileRes.text();
-            console.error("JSON laden fehlgeschlagen:", err);
-            return res.status(500).json({ message: "Datei nicht gefunden" });
-        }
-
-        const fileData = await fileRes.json();
-        const content = JSON.parse(
-            Buffer.from(String(fileData.content || "").replace(/\n/g, ""), "base64").toString("utf8")
-        );
-
-        const i = Number(index);
-        if (!Array.isArray(content) || isNaN(i) || !content[i]) {
+        const entryIndex = findEntryIndex(data, id, index);
+        if (entryIndex === -1) {
             return res.status(400).json({ message: "Eintrag nicht gefunden" });
         }
 
-        content[i].title = String(title ?? "").trim();
-        content[i].comment = String(comment ?? "").trim();
-
-        if (type === "blog") {
-            content[i].dateRange = String(dateRange ?? "").trim();
+        const entry = data[entryIndex];
+        if (!entry.id) {
+            entry.id = createEntryId();
         }
 
-        // Für alle Nicht-Blog-Bereiche: neue Bilder ersetzen alte Bilder
+        entry.title = String(title ?? "").trim();
+        entry.comment = String(comment ?? "").trim();
+
+        if (type === "blog") {
+            entry.dateRange = String(dateRange ?? "").trim();
+        }
+
         if (type !== "blog") {
             if (Array.isArray(images) && images.length > 0) {
                 const imagePaths = [];
 
                 for (let x = 0; x < images.length && x < 10; x++) {
                     const image = images[x];
-
-                    if (typeof image !== "string" || !image.includes(",")) {
-                        continue;
-                    }
+                    if (typeof image !== "string" || !image.includes(",")) continue;
 
                     const base64 = image.split(",")[1];
-                    const fileNameImg = `img_${Date.now()}_${x}.jpg`;
-                    const imagePath = `content/images/${fileNameImg}`;
-
-                    const uploadRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
-                        method: "PUT",
-                        headers: {
-                            Authorization: `Bearer ${GITHUB_TOKEN}`,
-                            "Content-Type": "application/json",
-                            "Accept": "application/vnd.github+json"
-                        },
-                        body: JSON.stringify({
-                            message: "Bild bei Bearbeitung ersetzt",
-                            content: base64
-                        })
+                    const uploadedPath = await githubUploadBase64Image({
+                        repo: REPO,
+                        token: GITHUB_TOKEN,
+                        base64,
+                        prefix: "img"
                     });
-
-                    if (!uploadRes.ok) {
-                        const err = await uploadRes.text();
-                        console.error("Bild-Upload fehlgeschlagen:", err);
-                        return res.status(500).json({ message: "Bild-Upload fehlgeschlagen" });
-                    }
-
-                    imagePaths.push(`/content/images/${fileNameImg}`);
+                    imagePaths.push(uploadedPath);
                 }
 
                 if (imagePaths.length > 0) {
-                    content[i].images = imagePaths;
+                    entry.images = imagePaths;
                 }
             }
         }
 
-        // Blog: alte Bilder behalten + neue ergänzen
         if (type === "blog") {
             const keptImages = Array.isArray(existingImages)
                 ? existingImages.filter(img => typeof img === "string" && img.trim() !== "")
-                : (Array.isArray(content[i].images) ? content[i].images : []);
+                : (Array.isArray(entry.images) ? entry.images : []);
 
             const newImagePaths = [];
 
@@ -123,67 +204,35 @@ export default async function handler(req, res) {
                     if (keptImages.length + newImagePaths.length >= 10) break;
 
                     const image = images[x];
-
-                    if (typeof image !== "string" || !image.includes(",")) {
-                        continue;
-                    }
+                    if (typeof image !== "string" || !image.includes(",")) continue;
 
                     const base64 = image.split(",")[1];
-                    const fileNameImg = `img_${Date.now()}_${x}.jpg`;
-                    const imagePath = `content/images/${fileNameImg}`;
-
-                    const uploadRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${imagePath}`, {
-                        method: "PUT",
-                        headers: {
-                            Authorization: `Bearer ${GITHUB_TOKEN}`,
-                            "Content-Type": "application/json",
-                            "Accept": "application/vnd.github+json"
-                        },
-                        body: JSON.stringify({
-                            message: "Blog Bild ergänzt",
-                            content: base64
-                        })
+                    const uploadedPath = await githubUploadBase64Image({
+                        repo: REPO,
+                        token: GITHUB_TOKEN,
+                        base64,
+                        prefix: "img"
                     });
-
-                    if (!uploadRes.ok) {
-                        const err = await uploadRes.text();
-                        console.error("Bild-Upload fehlgeschlagen:", err);
-                        return res.status(500).json({ message: "Bild-Upload fehlgeschlagen" });
-                    }
-
-                    newImagePaths.push(`/content/images/${fileNameImg}`);
+                    newImagePaths.push(uploadedPath);
                 }
             }
 
-            content[i].images = [...keptImages, ...newImagePaths].slice(0, 10);
+            entry.images = [...keptImages, ...newImagePaths].slice(0, 10);
         }
 
-        const updated = Buffer.from(
-            JSON.stringify(content, null, 2),
-            "utf8"
-        ).toString("base64");
-
-        const updateRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
-            method: "PUT",
-            headers: {
-                Authorization: `Bearer ${GITHUB_TOKEN}`,
-                "Content-Type": "application/json",
-                "Accept": "application/vnd.github+json"
-            },
-            body: JSON.stringify({
-                message: "Eintrag bearbeitet",
-                content: updated,
-                sha: fileData.sha
-            })
+        await githubSaveJson({
+            repo: REPO,
+            path: jsonPath,
+            token: GITHUB_TOKEN,
+            data,
+            sha,
+            message: "Eintrag bearbeitet"
         });
 
-        if (!updateRes.ok) {
-            const err = await updateRes.text();
-            console.error("JSON speichern fehlgeschlagen:", err);
-            return res.status(500).json({ message: "Fehler beim Speichern" });
-        }
-
-        return res.status(200).json({ message: "Bearbeitet ✅" });
+        return res.status(200).json({
+            message: "Bearbeitet ✅",
+            id: entry.id
+        });
     } catch (err) {
         console.error("Serverfehler in edit.js:", err);
         return res.status(500).json({ message: "Serverfehler" });
