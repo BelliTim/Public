@@ -13,13 +13,14 @@
 }
 
 body{
-    font-family:Arial, sans-serif;
+    font-family: "Segoe UI", Arial, sans-serif;
     background:
     radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 30%),
     radial-gradient(circle at top right, rgba(96,165,250,0.12), transparent 25%),
     linear-gradient(180deg,#071224 0%,#0f172a 45%,#111c33 100%);
     color:white;
     min-height:100vh;
+    letter-spacing:0.1px;
 }
 
 /* NAVBAR */
@@ -78,7 +79,11 @@ body{
     line-height:1.05;
     margin-bottom:14px;
     color:#ffffff;
-    text-shadow:0 8px 30px rgba(0,0,0,0.2);
+    font-weight:800;
+    letter-spacing:-0.02em;
+    text-shadow:
+        0 0 12px rgba(147,197,253,0.10),
+        0 8px 30px rgba(0,0,0,0.28);
 }
 
 .section-head p{
@@ -135,6 +140,12 @@ body{
     height:100%;
     object-fit:cover;
     display:none;
+    cursor:pointer;
+    transition:transform 0.25s ease;
+}
+
+.blog-slider img:hover{
+    transform:scale(1.02);
 }
 
 .blog-slider img.active{
@@ -193,18 +204,21 @@ body{
     font-size:0.9rem;
     font-weight:600;
 }
-
 .blog-title{
     color:#fff;
-    font-size:1.55rem;
-    line-height:1.2;
+    font-size:1.65rem;
+    line-height:1.15;
     margin-bottom:12px;
+    font-weight:800;
+    letter-spacing:-0.02em;
+    text-shadow:
+        0 0 10px rgba(147,197,253,0.08),
+        0 4px 18px rgba(0,0,0,0.22);
 }
-
 .blog-text{
-    color:#cbd5e1;
-    line-height:1.75;
-    font-size:1rem;
+    color:#d7e3f4;
+    line-height:1.8;
+    font-size:1.03rem;
     white-space:pre-line;
 }
 /* FOOTER */
@@ -235,8 +249,114 @@ footer a{
 .nav-links a{
     font-size:17px;
 }
-
+.lightbox{
+    position:fixed;
+    inset:0;
+    background:rgba(2,6,23,0.92);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:9999;
+    padding:20px;
+    backdrop-filter:blur(8px);
 }
+
+.lightbox.open{
+    display:flex;
+}
+
+.lightbox-inner{
+    position:relative;
+    width:min(1100px, 100%);
+    height:min(80vh, 820px);
+    border-radius:24px;
+    overflow:hidden;
+    background:
+        radial-gradient(circle at top right, rgba(96,165,250,0.12), transparent 28%),
+        linear-gradient(180deg, rgba(16,38,95,0.96), rgba(7,18,36,0.98));
+    border:1px solid rgba(96,165,250,0.18);
+    box-shadow:0 25px 80px rgba(0,0,0,0.45);
+}
+
+.lightbox-track{
+    position:relative;
+    width:100%;
+    height:100%;
+}
+
+.lightbox-track img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    display:none;
+    background:#020617;
+}
+
+.lightbox-track img.active{
+    display:block;
+}
+
+.lightbox-btn,
+.lightbox-close{
+    position:absolute;
+    z-index:3;
+    border:none;
+    cursor:pointer;
+    color:white;
+    background:rgba(2,6,23,0.65);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,0.12);
+}
+
+.lightbox-btn{
+    top:50%;
+    transform:translateY(-50%);
+    width:54px;
+    height:54px;
+    border-radius:50%;
+    font-size:24px;
+}
+
+.lightbox-btn.prev{ left:16px; }
+.lightbox-btn.next{ right:16px; }
+
+.lightbox-close{
+    top:16px;
+    right:16px;
+    width:46px;
+    height:46px;
+    border-radius:50%;
+    font-size:22px;
+}
+
+.lightbox-counter{
+    position:absolute;
+    left:16px;
+    bottom:16px;
+    z-index:3;
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(2,6,23,0.6);
+    border:1px solid rgba(255,255,255,0.10);
+    color:#dbeafe;
+    font-size:0.95rem;
+}
+
+@media(max-width:700px){
+    .lightbox-inner{
+        height:min(72vh, 700px);
+        border-radius:18px;
+    }
+
+    .lightbox-btn{
+        width:46px;
+        height:46px;
+        font-size:22px;
+    }
+}
+
 </style>
 </head>
 
@@ -373,8 +493,74 @@ async function loadBlogPosts() {
     }
 }
 
+let lightboxImages = [];
+let lightboxIndex = 0;
+
+function openLightbox(images, startIndex = 0) {
+    lightboxImages = images;
+    lightboxIndex = startIndex;
+
+    const track = document.getElementById("lightboxTrack");
+    const counter = document.getElementById("lightboxCounter");
+    const lightbox = document.getElementById("lightbox");
+
+    track.innerHTML = images.map((img, i) => `
+        <img src="${img}" class="${i === startIndex ? "active" : ""}" alt="Großansicht ${i + 1}">
+    `).join("");
+
+    counter.textContent = `${startIndex + 1} / ${images.length}`;
+    lightbox.classList.add("open");
+    document.body.style.overflow = "hidden";
+}
+
+function closeLightbox() {
+    document.getElementById("lightbox").classList.remove("open");
+    document.body.style.overflow = "";
+}
+
+function moveLightbox(direction) {
+    if (!lightboxImages.length) return;
+
+    const slides = document.querySelectorAll("#lightboxTrack img");
+    slides[lightboxIndex].classList.remove("active");
+
+    lightboxIndex += direction;
+    if (lightboxIndex < 0) lightboxIndex = lightboxImages.length - 1;
+    if (lightboxIndex >= lightboxImages.length) lightboxIndex = 0;
+
+    slides[lightboxIndex].classList.add("active");
+    document.getElementById("lightboxCounter").textContent = `${lightboxIndex + 1} / ${lightboxImages.length}`;
+}
+
+document.addEventListener("keydown", (e) => {
+    const lightbox = document.getElementById("lightbox");
+    if (!lightbox.classList.contains("open")) return;
+
+    if (e.key === "Escape") closeLightbox();
+    if (e.key === "ArrowLeft") moveLightbox(-1);
+    if (e.key === "ArrowRight") moveLightbox(1);
+});
+
+document.addEventListener("click", (e) => {
+    const lightbox = document.getElementById("lightbox");
+    if (e.target === lightbox) closeLightbox();
+});
+
 loadBlogPosts();
+
 </script>
+
+<div class="lightbox" id="lightbox">
+    <div class="lightbox-inner">
+        <button class="lightbox-close" type="button" onclick="closeLightbox()">✕</button>
+        <button class="lightbox-btn prev" type="button" onclick="moveLightbox(-1)">❮</button>
+        <button class="lightbox-btn next" type="button" onclick="moveLightbox(1)">❯</button>
+
+        <div class="lightbox-track" id="lightboxTrack"></div>
+        <div class="lightbox-counter" id="lightboxCounter"></div>
+    </div>
+</div>
+
 </body>
 </html>
 
