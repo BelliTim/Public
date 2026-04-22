@@ -546,9 +546,23 @@ async function saveBlogEdit(index) {
         return;
     }
 
+    let existingImages = [];
+    try {
+        const raw = document.getElementById(`existingImages-${index}`)?.value || "[]";
+        existingImages = JSON.parse(decodeURIComponent(raw));
+    } catch (e) {
+        existingImages = [];
+    }
+
+    const maxNewImages = Math.max(0, 10 - existingImages.length);
+
     let images = [];
     if (files.length > 0) {
-        images = await filesToCompressedBase64(files);
+        images = await filesToCompressedBase64(Array.from(files).slice(0, maxNewImages));
+    }
+
+    if (files.length > maxNewImages) {
+        alert(`Es können nur noch ${maxNewImages} weitere Bilder ergänzt werden.`);
     }
 
     try {
@@ -562,6 +576,7 @@ async function saveBlogEdit(index) {
                 dateRange,
                 comment,
                 images,
+                existingImages,
                 password: PASSWORD
             })
         });
