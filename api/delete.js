@@ -1,10 +1,93 @@
+function createEntryId() {
+    return `entry_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function ensureIds(data) {
+    if (!Array.isArray(data)) return [];
+    return data.map(item => {
+        if (item && typeof item === "object" && !item.id) {
+            return { ...item, id: createEntryId() };
+        }
+        return item;
+    });
+}
+
+async function githubGetJson({ repo, path, token }) {
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github+json"
+        }
+    });
+
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`JSON laden fehlgeschlagen: ${err}`);
+    }
+
+    const fileData = await res.json();
+    const decoded = Buffer.from(
+        String(fileData.content || "").replace(/\n/g, ""),
+        "base64"
+    ).toString("utf8");
+
+    const parsed = ensureIds(JSON.parse(decoded));
+
+    return {
+        data: Array.isArray(parsed) ? parsed : [],
+        sha: fileData.sha || null
+    };
+}
+
+async function githubSaveJson({ repo, path, token, data, sha, message }) {
+    const contentBase64 = Buffer.from(
+        JSON.stringify(data, null, 2),
+        "utf8"
+    ).toString("base64");
+
+    const res = await fetch(`https://api.github.com/repos/${repo}/contents/${path}`, {
+        method: "PUT",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/vnd.github+json"
+        },
+        body: JSON.stringify({
+            message,
+            content: contentBase64,
+            sha
+        })
+    });
+
+    if (!res.ok) {
+        const err = await res.text();
+        throw new Error(`JSON speichern fehlgeschlagen: ${err}`);
+    }
+
+    return await res.json();
+}
+
+function findEntryIndex(data, id, index) {
+    if (id) {
+        const found = data.findIndex(item => item && item.id === id);
+        if (found !== -1) return found;
+    }
+
+    const numericIndex = Number(index);
+    if (!Number.isNaN(numericIndex) && data[numericIndex]) {
+        return numericIndex;
+    }
+
+    return -1;
+}
+
 export default async function handler(req, res) {
     if (req.method !== "POST") {
         return res.status(405).json({ message: "Nur POST erlaubt" });
     }
 
     try {
-        const { type, index, password } = req.body || {};
+        const { type, id, index, password } = req.body || {};
 
         if (password !== process.env.ADMIN_PASSWORD) {
             return res.status(401).json({ message: "Falsches Passwort" });
@@ -27,56 +110,27 @@ export default async function handler(req, res) {
         const REPO = "BelliTim/Public";
         const jsonPath = `content/${fileName}`;
 
-        const getRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
-            headers: {
-                Authorization: `Bearer ${GITHUB_TOKEN}`,
-                "Accept": "application/vnd.github+json"
-            }
+        const { data, sha } = await githubGetJson({
+            repo: REPO,
+            path: jsonPath,
+            token: GITHUB_TOKEN
         });
 
-        if (!getRes.ok) {
-            const err = await getRes.text();
-            console.error("Datei nicht gefunden:", err);
-            return res.status(500).json({ message: "Datei nicht gefunden" });
+        const entryIndex = findEntryIndex(data, id, index);
+        if (entryIndex === -1) {
+            return res.status(400).json({ message: "Eintrag nicht gefunden" });
         }
 
-        const fileData = await getRes.json();
+        data.splice(entryIndex, 1);
 
-        let data = JSON.parse(
-            Buffer.from(String(fileData.content || "").replace(/\n/g, ""), "base64").toString("utf8")
-        );
-
-        const i = Number(index);
-        if (!Array.isArray(data) || isNaN(i) || i < 0 || i >= data.length) {
-            return res.status(400).json({ message: "Ungültiger Index" });
-        }
-
-        data.splice(i, 1);
-
-        const updated = Buffer.from(
-            JSON.stringify(data, null, 2),
-            "utf8"
-        ).toString("base64");
-
-        const saveRes = await fetch(`https://api.github.com/repos/${REPO}/contents/${jsonPath}`, {
-            method: "PUT",
-            headers: {
-                Authorization: `Bearer ${GITHUB_TOKEN}`,
-                "Content-Type": "application/json",
-                "Accept": "application/vnd.github+json"
-            },
-            body: JSON.stringify({
-                message: "Eintrag gelöscht",
-                content: updated,
-                sha: fileData.sha
-            })
+        await githubSaveJson({
+            repo: REPO,
+            path: jsonPath,
+            token: GITHUB_TOKEN,
+            data,
+            sha,
+            message: "Eintrag gelöscht"
         });
-
-        if (!saveRes.ok) {
-            const err = await saveRes.text();
-            console.error("Speichern fehlgeschlagen:", err);
-            return res.status(500).json({ message: "Speichern fehlgeschlagen" });
-        }
 
         return res.status(200).json({ message: "Gelöscht ✅" });
     } catch (err) {
