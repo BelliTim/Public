@@ -13,11 +13,11 @@
 }
 
 body{
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family:"Segoe UI", Arial, sans-serif;
     background:
-    radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 30%),
-    radial-gradient(circle at top right, rgba(96,165,250,0.12), transparent 25%),
-    linear-gradient(180deg,#071224 0%,#0f172a 45%,#111c33 100%);
+        radial-gradient(circle at top left, rgba(37,99,235,0.18), transparent 30%),
+        radial-gradient(circle at top right, rgba(96,165,250,0.12), transparent 25%),
+        linear-gradient(180deg,#071224 0%,#0f172a 45%,#111c33 100%);
     color:white;
     min-height:100vh;
     letter-spacing:0.1px;
@@ -59,19 +59,6 @@ body{
     text-align:center;
     margin-bottom:42px;
     padding:18px 10px 8px;
-}
-
-.section-badge{
-    display:inline-block;
-    padding:7px 14px;
-    border-radius:999px;
-    background:rgba(37,99,235,0.12);
-    border:1px solid rgba(96,165,250,0.14);
-    color:#93c5fd;
-    font-size:0.88rem;
-    font-weight:600;
-    margin-bottom:16px;
-    letter-spacing:0.3px;
 }
 
 .section-head h1{
@@ -204,6 +191,7 @@ body{
     font-size:0.9rem;
     font-weight:600;
 }
+
 .blog-title{
     color:#fff;
     font-size:1.65rem;
@@ -215,40 +203,15 @@ body{
         0 0 10px rgba(147,197,253,0.08),
         0 4px 18px rgba(0,0,0,0.22);
 }
+
 .blog-text{
     color:#d7e3f4;
     line-height:1.8;
     font-size:1.03rem;
     white-space:pre-line;
 }
-/* FOOTER */
-footer{
-    font-size:11px;
-    text-align:center;
-    margin-top:50px;
-    padding-bottom:25px;
-    color:#777;
-}
 
-footer a{
-    color:#777;
-    text-decoration:none;
-}
-
-/* MOBILE */
-@media(max-width:700px){
-
-.section-head h2{
-    font-size:34px;
-}
-
-.section-head span{
-    font-size:17px;
-}
-
-.nav-links a{
-    font-size:17px;
-}
+/* LIGHTBOX */
 .lightbox{
     position:fixed;
     inset:0;
@@ -344,7 +307,26 @@ footer a{
     font-size:0.95rem;
 }
 
-@media(max-width:700px){
+/* FOOTER */
+footer{
+    font-size:11px;
+    text-align:center;
+    margin-top:50px;
+    padding-bottom:25px;
+    color:#777;
+}
+
+footer a{
+    color:#777;
+    text-decoration:none;
+}
+
+/* MOBILE */
+@media (max-width:700px){
+    .nav-links a{
+        font-size:17px;
+    }
+
     .lightbox-inner{
         height:min(72vh, 700px);
         border-radius:18px;
@@ -356,7 +338,6 @@ footer a{
         font-size:22px;
     }
 }
-
 </style>
 </head>
 
@@ -371,26 +352,30 @@ footer a{
 </header>
 
 <main class="page-wrap">
-
- <div class="section-head">
-
-<h1>Reisen, Eindrücke und besondere Momente.</h1>
-
-<p>↓ Neuester Beitrag ↓</p>
-
-</div>
+    <div class="section-head">
+        <h1>Reisen, Eindrücke und besondere Momente.</h1>
+        <p>↓ Neuester Beitrag ↓</p>
+    </div>
 
     <section class="blog-grid" id="blogGrid">
         <!-- HIER kommen später automatisch neue Blog Beiträge rein -->
     </section>
-
 </main>
 
 <footer>
-    <a href="rechtliches.html">
-        Rechtliches/Datenschutz/Impressum
-    </a>
+    <a href="rechtliches.html">Rechtliches/Datenschutz/Impressum</a>
 </footer>
+
+<div class="lightbox" id="lightbox">
+    <div class="lightbox-inner">
+        <button class="lightbox-close" type="button" onclick="closeLightbox()">✕</button>
+        <button class="lightbox-btn prev" type="button" onclick="moveLightbox(-1)">❮</button>
+        <button class="lightbox-btn next" type="button" onclick="moveLightbox(1)">❯</button>
+        <div class="lightbox-track" id="lightboxTrack"></div>
+        <div class="lightbox-counter" id="lightboxCounter"></div>
+    </div>
+</div>
+
 <script>
 function escapeHtml(value) {
     return String(value ?? "")
@@ -434,6 +419,72 @@ function initBlogSlider(container) {
     };
 }
 
+let lightboxImages = [];
+let lightboxIndex = 0;
+let touchStartX = 0;
+let touchEndX = 0;
+
+function openLightbox(images, startIndex = 0) {
+    lightboxImages = images;
+    lightboxIndex = startIndex;
+
+    const track = document.getElementById("lightboxTrack");
+    const counter = document.getElementById("lightboxCounter");
+    const lightbox = document.getElementById("lightbox");
+
+    track.innerHTML = images.map((img, i) => `
+        <img src="${img}" class="${i === startIndex ? "active" : ""}" alt="Großansicht ${i + 1}">
+    `).join("");
+
+    counter.textContent = `${startIndex + 1} / ${images.length}`;
+    lightbox.classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    track.addEventListener("touchstart", handleTouchStart, { passive: true });
+    track.addEventListener("touchend", handleTouchEnd, { passive: true });
+}
+
+function closeLightbox() {
+    const lightbox = document.getElementById("lightbox");
+    const track = document.getElementById("lightboxTrack");
+
+    lightbox.classList.remove("open");
+    document.body.style.overflow = "";
+    track.removeEventListener("touchstart", handleTouchStart);
+    track.removeEventListener("touchend", handleTouchEnd);
+}
+
+function moveLightbox(direction) {
+    if (!lightboxImages.length) return;
+
+    const slides = document.querySelectorAll("#lightboxTrack img");
+    slides[lightboxIndex].classList.remove("active");
+
+    lightboxIndex += direction;
+    if (lightboxIndex < 0) lightboxIndex = lightboxImages.length - 1;
+    if (lightboxIndex >= lightboxImages.length) lightboxIndex = 0;
+
+    slides[lightboxIndex].classList.add("active");
+    document.getElementById("lightboxCounter").textContent = `${lightboxIndex + 1} / ${lightboxImages.length}`;
+}
+
+function handleTouchStart(e) {
+    touchStartX = e.changedTouches[0].screenX;
+}
+
+function handleTouchEnd(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchEndX - touchStartX;
+
+    if (Math.abs(diff) < 40) return;
+
+    if (diff < 0) {
+        moveLightbox(1);
+    } else {
+        moveLightbox(-1);
+    }
+}
+
 async function loadBlogPosts() {
     const grid = document.getElementById("blogGrid");
 
@@ -457,6 +508,7 @@ async function loadBlogPosts() {
             const dateRange = escapeHtml(item.dateRange || item.date || "");
             const comment = escapeHtml(item.comment || "");
             const images = Array.isArray(item.images) ? item.images : [];
+            const encodedImages = encodeURIComponent(JSON.stringify(images));
 
             return `
                 <article class="blog-card">
@@ -464,7 +516,13 @@ async function loadBlogPosts() {
                         ${
                             images.length
                                 ? images.map((img, j) => `
-                                    <img src="${img}" class="${j === 0 ? "active" : ""}" alt="${title}">
+                                    <img
+                                        src="${img}"
+                                        class="${j === 0 ? "active" : ""}"
+                                        alt="${title}"
+                                        data-images="${encodedImages}"
+                                        data-index="${j}"
+                                    >
                                 `).join("")
                                 : `<img src="data:image/svg+xml;utf8,
                                     <svg xmlns='http://www.w3.org/2000/svg' width='1200' height='600'>
@@ -487,49 +545,18 @@ async function loadBlogPosts() {
 
         document.querySelectorAll(".blog-slider").forEach(initBlogSlider);
 
+        document.querySelectorAll(".blog-slider img[data-images]").forEach(img => {
+            img.addEventListener("click", () => {
+                const images = JSON.parse(decodeURIComponent(img.dataset.images));
+                const index = Number(img.dataset.index || 0);
+                openLightbox(images, index);
+            });
+        });
+
     } catch (e) {
         console.error("Blog konnte nicht geladen werden:", e);
         grid.innerHTML = "";
     }
-}
-
-let lightboxImages = [];
-let lightboxIndex = 0;
-
-function openLightbox(images, startIndex = 0) {
-    lightboxImages = images;
-    lightboxIndex = startIndex;
-
-    const track = document.getElementById("lightboxTrack");
-    const counter = document.getElementById("lightboxCounter");
-    const lightbox = document.getElementById("lightbox");
-
-    track.innerHTML = images.map((img, i) => `
-        <img src="${img}" class="${i === startIndex ? "active" : ""}" alt="Großansicht ${i + 1}">
-    `).join("");
-
-    counter.textContent = `${startIndex + 1} / ${images.length}`;
-    lightbox.classList.add("open");
-    document.body.style.overflow = "hidden";
-}
-
-function closeLightbox() {
-    document.getElementById("lightbox").classList.remove("open");
-    document.body.style.overflow = "";
-}
-
-function moveLightbox(direction) {
-    if (!lightboxImages.length) return;
-
-    const slides = document.querySelectorAll("#lightboxTrack img");
-    slides[lightboxIndex].classList.remove("active");
-
-    lightboxIndex += direction;
-    if (lightboxIndex < 0) lightboxIndex = lightboxImages.length - 1;
-    if (lightboxIndex >= lightboxImages.length) lightboxIndex = 0;
-
-    slides[lightboxIndex].classList.add("active");
-    document.getElementById("lightboxCounter").textContent = `${lightboxIndex + 1} / ${lightboxImages.length}`;
 }
 
 document.addEventListener("keydown", (e) => {
@@ -547,20 +574,7 @@ document.addEventListener("click", (e) => {
 });
 
 loadBlogPosts();
-
 </script>
-
-<div class="lightbox" id="lightbox">
-    <div class="lightbox-inner">
-        <button class="lightbox-close" type="button" onclick="closeLightbox()">✕</button>
-        <button class="lightbox-btn prev" type="button" onclick="moveLightbox(-1)">❮</button>
-        <button class="lightbox-btn next" type="button" onclick="moveLightbox(1)">❯</button>
-
-        <div class="lightbox-track" id="lightboxTrack"></div>
-        <div class="lightbox-counter" id="lightboxCounter"></div>
-    </div>
-</div>
 
 </body>
 </html>
-
