@@ -222,6 +222,31 @@ background:#0b1220;
 .trikot-image-wrap:hover img{
 transform:scale(1.02);
 }
+/* =====================
+  Trikots Verstecken
+===================== */
+
+.trikot-hidden {
+    display: none;
+}
+
+.show-more-trikots {
+    display: block;
+    margin: 28px auto 10px;
+    padding: 14px 24px;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #38bdf8, #2563eb);
+    color: white;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+}
+
+.show-more-trikots:hover {
+    transform: translateY(-2px);
+}
 
 /* =====================
    🔍 LIGHTBOX
