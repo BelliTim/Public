@@ -120,10 +120,44 @@ async function loadTrikots() {
                 </div>
             `;
         }).join("");
+        
+        collapseTrikots();
 
     } catch {
         console.log("Fehler bei Trikots");
     }
+}
+
+function collapseTrikots() {
+    const cards = document.querySelectorAll("#trikots-container .trikot-card");
+    const visibleCount = 3;
+
+    if (cards.length <= visibleCount) return;
+
+    cards.forEach((card, index) => {
+        if (index >= visibleCount) {
+            card.classList.add("trikot-hidden");
+        }
+    });
+
+    const button = document.createElement("button");
+    button.textContent = "Weitere Trikots anzeigen";
+    button.className = "show-more-trikots";
+
+    button.onclick = () => {
+        const hiddenCards = document.querySelectorAll(".trikot-hidden");
+        const isClosed = hiddenCards[0]?.style.display !== "block";
+
+        hiddenCards.forEach(card => {
+            card.style.display = isClosed ? "block" : "none";
+        });
+
+        button.textContent = isClosed
+            ? "Trikots einklappen"
+            : "Weitere Trikots anzeigen";
+    };
+
+    document.getElementById("trikots-container").after(button);
 }
 
 // =========================
