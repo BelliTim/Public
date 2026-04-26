@@ -401,6 +401,7 @@ align-items:center;
 }
 
 .card{
+position:relative;
 background:linear-gradient(180deg, #020617 0%, #030b23 100%);
 border-radius:28px;
 padding:34px;
@@ -408,67 +409,22 @@ transition:0.3s;
 width:100%;
 max-width:560px;
 box-shadow:0 18px 40px rgba(0,0,0,0.28);
+overflow:hidden;
 }
 
 .card:hover{
 transform:scale(1.02);
 }
 
-.card h3{
-margin:26px 0 18px;
-text-align:center;
-font-size:30px;
-font-weight:700;
-}
-
-.card p{
-  background:
-linear-gradient(to bottom,
-#020617 0%,
-#020617 48%,
-#0f172a 48%,
-#111c36 100%);
-opacity:0.8;
-text-align:center;
-font-size:22px;
-}
-
-.card h3,
-.card p{
-position:relative;
-z-index:2;
-}
-
-.card p{
-opacity:0.8;
-text-align:center;
-font-size:22px;
-margin:0;
-padding:0 0 26px;
-}
-
-.card::after{
-content:"";
-position:absolute;
-left:34px;
-right:34px;
-top:56%;
-bottom:34px;
-background:linear-gradient(180deg, #0f172a 0%, #111c36 100%);
-border-radius:22px;
-z-index:1;
-}
-
-/* hellblaues Inlay für Spiele */
 .card-slider{
 position:relative;
 width:100%;
 height:260px;
 overflow:hidden;
 border-radius:22px;
-margin-bottom:10px;
+margin-bottom:26px;
 background:linear-gradient(180deg, #0f172a 0%, #111c36 100%);
-padding:0;
+z-index:2;
 }
 
 .card-slider img{
@@ -484,6 +440,31 @@ border-radius:18px;
 display:block;
 }
 
+.card h3,
+.card p{
+position:relative;
+z-index:2;
+text-align:center;
+}
+
+.card h3{
+margin:0 0 18px;
+font-size:30px;
+font-weight:700;
+background:linear-gradient(180deg, #0f172a 0%, #111c36 100%);
+border-radius:22px 22px 0 0;
+padding:32px 18px 10px;
+}
+
+.card p{
+opacity:0.8;
+font-size:22px;
+margin:0;
+background:linear-gradient(180deg, #111c36 0%, #0f172a 100%);
+border-radius:0 0 22px 22px;
+padding:10px 18px 32px;
+}
+
 .card-slider button{
 position:absolute;
 top:50%;
@@ -497,9 +478,7 @@ font-size:24px;
 }
 
 .card-slider .prev{left:10px;}
-.card-slider .next{right:10px;}
-
-/* =====================
+.card-slider .next{right:10px;}/* =====================
    🚗 GARAGE
 ===================== */
 .garage-container{
