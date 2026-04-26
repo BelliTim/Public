@@ -301,16 +301,23 @@ display:block;
 .lightbox-close{
 position:absolute;
 top:18px;
-right:22px;
+right:18px;
 z-index:5;
-width:54px;
-height:54px;
+width:74px;
+height:74px;
 border:none;
-border-radius:18px;
-background:rgba(255,255,255,0.9);
-color:#ffffff;
-font-size:34px;
+border-radius:50%;
+background:rgba(70,75,95,0.78);
+backdrop-filter:blur(8px);
+-webkit-backdrop-filter:blur(8px);
+color:white;
+font-size:44px;
+font-weight:300;
+display:flex;
+align-items:center;
+justify-content:center;
 cursor:pointer;
+box-shadow:0 8px 20px rgba(0,0,0,0.28);
 }
 
 .lightbox-btn{
@@ -318,13 +325,30 @@ position:absolute;
 top:50%;
 transform:translateY(-50%);
 z-index:5;
-background:rgba(0,0,0,0.55);
-color:white;
+width:74px;
+height:74px;
 border:none;
-font-size:38px;
-padding:14px 18px;
+border-radius:50%;
+background:rgba(70,75,95,0.78);
+backdrop-filter:blur(8px);
+-webkit-backdrop-filter:blur(8px);
+color:white;
+font-size:44px;
+font-weight:300;
+display:flex;
+align-items:center;
+justify-content:center;
 cursor:pointer;
+box-shadow:0 8px 20px rgba(0,0,0,0.28);
 }
+.lightbox-btn.prev{
+left:22px;
+}
+
+.lightbox-btn.next{
+right:22px;
+}
+
 
 .lightbox-btn.prev{
 left:10px;
