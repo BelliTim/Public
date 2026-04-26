@@ -448,7 +448,15 @@ padding:0 0 26px;
 }
 
 .card::after{
-display:none;
+content:"";
+position:absolute;
+left:34px;
+right:34px;
+top:56%;
+bottom:34px;
+background:linear-gradient(180deg, #0f172a 0%, #111c36 100%);
+border-radius:22px;
+z-index:1;
 }
 
 /* hellblaues Inlay für Spiele */
