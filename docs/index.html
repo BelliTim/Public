@@ -170,6 +170,13 @@ async function loadTrikots() {
     try {
         const res = await fetch('/content/trikots.json');
         const data = await res.json();
+        
+        data.sort((a, b) => {
+    const yearA = parseInt((a.title.match(/\d{4}/) || [0])[0]);
+    const yearB = parseInt((b.title.match(/\d{4}/) || [0])[0]);
+
+    return yearA - yearB; // neueste zuerst
+});
 
         const container = document.getElementById("trikots-container");
 
