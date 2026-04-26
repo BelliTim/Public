@@ -566,3 +566,112 @@ height:clamp(220px, 55svh, 350px);
 }
 
 }
+
+
+/* =====================
+   ANGLEICHUNG: TRIKOTS / SPIELE / GARAGE
+===================== */
+
+/* gleiche Grundbreite wie Trikot/Garage */
+.cards,
+.garage-container {
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+/* Spiele-Box wie Bild 1: größer + Verlauf */
+.card {
+    width: 100%;
+    max-width: 620px;
+    margin: 0 auto;
+    background:
+        radial-gradient(circle at top right, rgba(56,189,248,0.10), transparent 35%),
+        linear-gradient(180deg, #020617 0%, #030b23 100%);
+    border-radius: 28px;
+    padding: 34px 28px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+}
+
+/* helleres Inlay bei Spiele-Bildern */
+.card-slider {
+    background: linear-gradient(180deg, #0f172a 0%, #111c36 100%);
+    border-radius: 22px;
+    padding: 0;
+    height: 300px;
+}
+
+/* Bild im Spiele-Inlay */
+.card-slider img {
+    border-radius: 18px;
+}
+
+/* Spiele-Text mittiger / größer wie Trikots */
+.card h3 {
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin: 24px 0 18px;
+}
+
+.card p {
+    text-align: center;
+    font-size: 22px;
+    opacity: 0.75;
+}
+
+/* Garage-äußere Box bekommt denselben Verlauf */
+.garage-column {
+    background:
+        radial-gradient(circle at top right, rgba(56,189,248,0.10), transparent 35%),
+        linear-gradient(180deg, #020617 0%, #030b23 100%);
+    border-radius: 28px;
+    padding: 34px 28px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+}
+
+/* Garage-Inlay schöner/heller */
+.garage-entry {
+    background: linear-gradient(180deg, #0f172a 0%, #111c36 100%);
+    border-radius: 22px;
+    padding: 28px;
+}
+
+/* Garage-Slider passend ins Inlay */
+.slider-garage {
+    border-radius: 18px;
+    margin-bottom: 20px;
+}
+
+/* Mobile Feinschliff */
+@media (max-width: 900px) {
+    .cards,
+    .garage-container {
+        max-width: 100%;
+    }
+
+    .card,
+    .garage-column {
+        max-width: 620px;
+        width: 100%;
+        padding: 28px 20px;
+        border-radius: 28px;
+    }
+
+    .card-slider {
+        height: 260px;
+        border-radius: 22px;
+    }
+
+    .card h3 {
+        font-size: 25px;
+    }
+
+    .card p {
+        font-size: 20px;
+    }
+
+    .garage-entry {
+        padding: 22px;
+        border-radius: 22px;
+    }
+}
