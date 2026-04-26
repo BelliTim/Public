@@ -149,8 +149,11 @@ margin-bottom:20px;
 display:grid;
 grid-template-columns:repeat(auto-fit, minmax(220px, 260px));
 justify-content:center;
+justify-items:center;
 gap:24px;
+width:100%;
 padding:20px 12px;
+box-sizing:border-box;
 }
 
 .trikot-card{
@@ -160,7 +163,7 @@ padding:20px 14px 18px;
 box-shadow:0 18px 40px rgba(0,0,0,0.28);
 transition:0.3s;
 text-align:center;
-max-width:260px;
+max-width:300px;
 width:100%;
 margin:0 auto;
 }
