@@ -402,6 +402,7 @@ align-items:center;
 
 .card{
 position:relative;
+isolation:isolate;
 background:linear-gradient(180deg, #020617 0%, #030b23 100%);
 border-radius:28px;
 padding:34px;
@@ -440,29 +441,25 @@ border-radius:18px;
 display:block;
 }
 
-.card h3{
-margin:0;
-font-size:30px;
-font-weight:700;
-padding:34px 18px 14px;
+.card h3,
+.card p{
+position:relative;
+z-index:2;
 text-align:center;
 }
 
 .card h3{
-margin:0 0 18px;
+margin:0;
 font-size:30px;
 font-weight:700;
-background:linear-gradient(180deg, #0f172a 0%, #111c36 100%);
-border-radius:22px 22px 0 0;
-padding:32px 18px 10px;
+padding:32px 18px 12px;
 }
 
 .card p{
 margin:0;
-padding:0 18px 34px;
+padding:4px 18px 32px;
 font-size:22px;
 opacity:0.8;
-text-align:center;
 }
 
 .card::after{
@@ -470,11 +467,12 @@ content:"";
 position:absolute;
 left:34px;
 right:34px;
-top:58%;
+top:calc(260px + 60px);
 bottom:34px;
-background:linear-gradient(180deg,#0f172a 0%, #111c36 100%);
+background:linear-gradient(180deg, #0f172a 0%, #111c36 100%);
 border-radius:22px;
 z-index:1;
+pointer-events:none;
 }
 
 .card-slider button{
