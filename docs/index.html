@@ -65,9 +65,14 @@
     </a>
 </footer>    
 
-<div id="lightbox" class="lightbox" onclick="closeLightbox()" style="display:none;">
-    <span class="lightbox-close">&times;</span>
-    <img id="lightbox-img" class="lightbox-img" src="" alt="Großansicht">
+<div class="lightbox" id="lightbox">
+    <div class="lightbox-inner">
+        <button class="lightbox-close" type="button" onclick="closeLightbox()">✕</button>
+        <button class="lightbox-btn prev" type="button" onclick="moveLightbox(-1)">❮</button>
+        <button class="lightbox-btn next" type="button" onclick="moveLightbox(1)">❯</button>
+        <div class="lightbox-track" id="lightboxTrack"></div>
+        <div class="lightbox-counter" id="lightboxCounter"></div>
+    </div>
 </div>
     
 <script>
@@ -80,17 +85,72 @@ function getImageList(item) {
     return [];
 }
 
-function openLightbox(src) {
-    const box = document.getElementById("lightbox");
-    const img = document.getElementById("lightbox-img");
+let lightboxImages = [];
+let lightboxIndex = 0;
+let touchStartX = 0;
+let touchEndX = 0;
 
-    img.src = src;
-    box.style.display = "flex";
+function openLightbox(images, startIndex = 0) {
+    if (!Array.isArray(images) || !images.length) return;
+
+    lightboxImages = images;
+    lightboxIndex = startIndex;
+
+    const track = document.getElementById("lightboxTrack");
+    const counter = document.getElementById("lightboxCounter");
+    const lightbox = document.getElementById("lightbox");
+
+    track.innerHTML = images.map((img, i) => `
+        <img src="${img}" class="${i === startIndex ? "active" : ""}" alt="Großansicht ${i + 1}">
+    `).join("");
+
+    counter.textContent = `${startIndex + 1} / ${images.length}`;
+    lightbox.classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    track.addEventListener("touchstart", handleTouchStart, { passive: true });
+    track.addEventListener("touchend", handleTouchEnd, { passive: true });
 }
 
 function closeLightbox() {
-    document.getElementById("lightbox").style.display = "none";
-    document.getElementById("lightbox-img").src = "";
+    const lightbox = document.getElementById("lightbox");
+    const track = document.getElementById("lightboxTrack");
+
+    lightbox.classList.remove("open");
+    document.body.style.overflow = "";
+
+    track.removeEventListener("touchstart", handleTouchStart);
+    track.removeEventListener("touchend", handleTouchEnd);
+}
+
+function moveLightbox(direction) {
+    if (!lightboxImages.length) return;
+
+    const slides = document.querySelectorAll("#lightboxTrack img");
+    if (!slides.length) return;
+
+    slides[lightboxIndex].classList.remove("active");
+
+    lightboxIndex += direction;
+    if (lightboxIndex < 0) lightboxIndex = lightboxImages.length - 1;
+    if (lightboxIndex >= lightboxImages.length) lightboxIndex = 0;
+
+    slides[lightboxIndex].classList.add("active");
+    document.getElementById("lightboxCounter").textContent = `${lightboxIndex + 1} / ${lightboxImages.length}`;
+}
+
+function handleTouchStart(e) {
+    touchStartX = e.changedTouches[0].screenX;
+}
+
+function handleTouchEnd(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchEndX - touchStartX;
+
+    if (Math.abs(diff) < 40) return;
+
+    if (diff < 0) moveLightbox(1);
+    else moveLightbox(-1);
 }
 
 // =========================
