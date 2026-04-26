@@ -174,7 +174,7 @@ async function loadTrikots() {
                     <div class="trikot-season">${season}</div>
                     <div class="trikot-type">${type}</div>
 
-<button class="trikot-image-wrap" type="button" onclick='openLightbox("${firstImage}")'>
+<button class="trikot-image-wrap" type="button" onclick='openLightbox(${JSON.stringify(imageList)}, 0)'>
                         <img src="${firstImage}" alt="${season}">
                     </button>
                 </div>
@@ -237,7 +237,12 @@ async function loadSpiele() {
                 <div class="card">
                     <div class="card-slider">
                         ${imageList.map((img, index) => `
-                            <img src="${img}" class="${index === 0 ? 'active' : ''}" alt="${item.title || ""}">
+                           <img 
+    src="${img}" 
+    class="${index === 0 ? 'active' : ''}" 
+    alt="${item.title || ""}"
+    onclick='openLightbox(${JSON.stringify(imageList)}, ${index})'
+>
                         `).join("")}
 
                         ${imageList.length > 1 ? `
@@ -279,7 +284,11 @@ async function loadGarage(type, containerId) {
 
                     <div class="card-slider garage-slider">
                         ${imageList.map((img, index) => `
-                            <img src="${img}" class="${index === 0 ? 'active' : ''}">
+                            <img 
+    src="${img}" 
+    class="${index === 0 ? 'active' : ''}"
+    onclick='openLightbox(${JSON.stringify(imageList)}, ${index})'
+>
                         `).join("")}
 
                         ${imageList.length > 1 ? `
