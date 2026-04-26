@@ -99,13 +99,23 @@ function openLightbox(images, startIndex = 0) {
     const track = document.getElementById("lightboxTrack");
     const counter = document.getElementById("lightboxCounter");
     const lightbox = document.getElementById("lightbox");
-
+    const prevBtn = lightbox.querySelector(".lightbox-btn.prev");
+    const nextBtn = lightbox.querySelector(".lightbox-btn.next");
     track.innerHTML = images.map((img, i) => `
         <img src="${img}" class="${i === startIndex ? "active" : ""}" alt="Großansicht ${i + 1}">
     `).join("");
 
     counter.textContent = `${startIndex + 1} / ${images.length}`;
-    lightbox.classList.add("open");
+   
+    if (images.length <= 1) {
+    prevBtn.style.display = "none";
+    nextBtn.style.display = "none";
+} else {
+    prevBtn.style.display = "";
+    nextBtn.style.display = "";
+}
+    
+     lightbox.classList.add("open");
     document.body.style.overflow = "hidden";
 
     track.addEventListener("touchstart", handleTouchStart, { passive: true });
