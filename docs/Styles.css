@@ -440,10 +440,11 @@ border-radius:18px;
 display:block;
 }
 
-.card h3,
-.card p{
-position:relative;
-z-index:2;
+.card h3{
+margin:0;
+font-size:30px;
+font-weight:700;
+padding:34px 18px 14px;
 text-align:center;
 }
 
@@ -457,12 +458,23 @@ padding:32px 18px 10px;
 }
 
 .card p{
-opacity:0.8;
-font-size:22px;
 margin:0;
-background:linear-gradient(180deg, #111c36 0%, #0f172a 100%);
-border-radius:0 0 22px 22px;
-padding:10px 18px 32px;
+padding:0 18px 34px;
+font-size:22px;
+opacity:0.8;
+text-align:center;
+}
+
+.card::after{
+content:"";
+position:absolute;
+left:34px;
+right:34px;
+top:58%;
+bottom:34px;
+background:linear-gradient(180deg,#0f172a 0%, #111c36 100%);
+border-radius:22px;
+z-index:1;
 }
 
 .card-slider button{
