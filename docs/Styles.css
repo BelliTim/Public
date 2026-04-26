@@ -255,11 +255,15 @@ transform:scale(1.02);
 position:fixed;
 inset:0;
 background:rgba(0,0,0,0.9);
-display:flex;
+display:none;
 align-items:center;
 justify-content:center;
 z-index:3000;
 padding:20px;
+}
+
+.lightbox.open{
+display:flex;
 }
 
 .lightbox-img{
