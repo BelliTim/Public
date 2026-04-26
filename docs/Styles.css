@@ -390,20 +390,24 @@ object-position:center 25%;
 }
 }
 /*=========
-   📝 SPIELE (BLOG CARDS)
+   📝 SPIELE
 ===================== */
 .cards{
 display:flex;
 flex-direction:column;
 gap:25px;
 padding:20px;
+align-items:center;
 }
 
 .card{
-background:#020617;
-border-radius:12px;
-padding:20px;
+background:linear-gradient(180deg, #020617 0%, #030b23 100%);
+border-radius:28px;
+padding:34px;
 transition:0.3s;
+width:100%;
+max-width:560px;
+box-shadow:0 18px 40px rgba(0,0,0,0.28);
 }
 
 .card:hover{
@@ -411,21 +415,28 @@ transform:scale(1.02);
 }
 
 .card h3{
-margin:5px 0;
+margin:26px 0 18px;
+text-align:center;
+font-size:30px;
+font-weight:700;
 }
 
 .card p{
 opacity:0.8;
+text-align:center;
+font-size:22px;
 }
 
-/* Slider in Cards */
+/* hellblaues Inlay für Spiele */
 .card-slider{
 position:relative;
 width:100%;
-height:220px;
+height:260px;
 overflow:hidden;
-border-radius:10px;
+border-radius:22px;
 margin-bottom:10px;
+background:linear-gradient(180deg, #0f172a 0%, #111c36 100%);
+padding:0;
 }
 
 .card-slider img{
@@ -434,6 +445,7 @@ width:100%;
 height:100%;
 object-fit:cover;
 display:none;
+border-radius:18px;
 }
 
 .card-slider img.active{
@@ -447,8 +459,9 @@ transform:translateY(-50%);
 background:rgba(0,0,0,0.6);
 color:white;
 border:none;
-padding:6px 10px;
+padding:10px 14px;
 cursor:pointer;
+font-size:24px;
 }
 
 .card-slider .prev{left:10px;}
@@ -464,16 +477,17 @@ gap:40px;
 }
 
 .garage-column{
-background:#020617;
-padding:20px;
-border-radius:12px;
+background:linear-gradient(180deg, #020617 0%, #030b23 100%);
+padding:34px;
+border-radius:28px;
+box-shadow:0 18px 40px rgba(0,0,0,0.28);
 }
 
 .garage-entry{
 margin-top:20px;
-padding:20px;
+padding:28px;
 background:#0f172a;
-border-radius:10px;
+border-radius:22px;
 }
 
 .garage-entry img{
@@ -487,9 +501,9 @@ border-radius:8px;
 position:relative;
 width:100%;
 max-width:700px;
-height:clamp(250px, 60svh, 420px); /* 🔥 BEST FIX */
+height:clamp(250px, 60svh, 420px);
 margin:auto;
-margin-bottom:40px; /* 🔥 verhindert Überlappung */
+margin-bottom:40px;
 overflow:hidden;
 border-radius:10px;
 }
@@ -527,7 +541,6 @@ text-align:center;
 margin-top:10px;
 opacity:0.8;
 }
-
 /* =====================
    📱 MOBILE
 ===================== */
@@ -564,6 +577,25 @@ gap:25px;
 .slider-garage{
 height:clamp(220px, 55svh, 350px);
 }
+.card{
+max-width:560px;
+padding:28px;
+border-radius:28px;
+}
 
+.card-slider{
+height:260px;
+border-radius:22px;
+}
+
+.garage-column{
+padding:28px;
+border-radius:28px;
+}
+
+.garage-entry{
+padding:24px;
+border-radius:22px;
+}
 }
 
