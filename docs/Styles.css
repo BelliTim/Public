@@ -257,12 +257,16 @@ transform:scale(1.02);
 .lightbox{
 position:fixed;
 inset:0;
-background:rgba(0,0,0,0.92);
 display:none;
 align-items:center;
 justify-content:center;
 z-index:3000;
 padding:20px;
+
+background:
+radial-gradient(circle at top, rgba(37,99,235,0.22), transparent 35%),
+radial-gradient(circle at bottom, rgba(59,130,246,0.18), transparent 35%),
+linear-gradient(180deg, #020617 0%, #030b23 45%, #020617 100%);
 }
 
 .lightbox.open{
@@ -276,6 +280,15 @@ height:100%;
 display:flex;
 align-items:center;
 justify-content:center;
+
+border:1px solid rgba(59,130,246,0.35);
+border-radius:28px;
+box-shadow:
+0 0 40px rgba(37,99,235,0.18),
+0 0 90px rgba(37,99,235,0.12),
+inset 0 0 0 1px rgba(255,255,255,0.03);
+padding:20px;
+overflow:hidden;
 }
 
 .lightbox-track{
