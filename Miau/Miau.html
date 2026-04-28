@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Miau</title>
+
+<link rel="stylesheet" href="/blog/blogstyles.css">
+</head>
+
+<body>
+
+<header class="navbar">
+    <div class="nav-inner">
+        <nav class="nav-links">
+            <a href="/">Home</a>
+        </nav>
+    </div>
+</header>
+
+<main class="page-wrap">
+
+    <div class="section-head">
+        <h1>Miau</h1>
+        <p>Ein kleiner Bilder-Slider.</p>
+    </div>
+
+    <section class="blog-grid">
+        <article class="blog-card">
+
+            <div class="blog-slider" id="miauSlider">
+
+                <img src="Images/IMG_0089.jpeg" class="active" alt="">
+                <img src="Images/IMG_2501.jpeg" alt="">
+                <img src="Images/PHOTO-2024-10-30-11-32-13.jpeg" alt="">
+                <img src="Images/e91747c8-fe65-4764-8176-2627075513de.jpeg" alt="">
+
+                <button class="prev" type="button">❮</button>
+                <button class="next" type="button">❯</button>
+
+            </div>
+
+            <div class="blog-content">
+                <h3 class="blog-title">Miau</h3>
+                <div class="blog-text">
+                    Bildergalerie
+                </div>
+            </div>
+
+        </article>
+    </section>
+
+</main>
+
+<footer>
+    <a href="/rechtliches.html">
+        Rechtliches/Datenschutz/Impressum
+    </a>
+</footer>
+
+<div class="lightbox" id="lightbox">
+    <div class="lightbox-inner">
+
+        <button class="lightbox-close" type="button" onclick="closeLightbox()">✕</button>
+        <button class="lightbox-btn prev" type="button" onclick="moveLightbox(-1)">❮</button>
+        <button class="lightbox-btn next" type="button" onclick="moveLightbox(1)">❯</button>
+
+        <div class="lightbox-track" id="lightboxTrack"></div>
+        <div class="lightbox-counter" id="lightboxCounter"></div>
+
+    </div>
+</div>
+
+<script>
+const images = [
+    "Images/IMG_0089.jpeg",
+    "Images/IMG_2501.jpeg",
+    "Images/PHOTO-2024-10-30-11-32-13.jpeg",
+    "Images/e91747c8-fe65-4764-8176-2627075513de.jpeg"
+];
+
+let sliderIndex = 0;
+let lightboxIndex = 0;
+let touchStartX = 0;
+let touchEndX = 0;
+
+const slider = document.getElementById("miauSlider");
+const slides = slider.querySelectorAll("img");
+const prevBtn = slider.querySelector(".prev");
+const nextBtn = slider.querySelector(".next");
+
+function showSlide(index){
+    slides.forEach(img => img.classList.remove("active"));
+    slides[index].classList.add("active");
+}
+
+prevBtn.onclick = () => {
+    sliderIndex = (sliderIndex - 1 + slides.length) % slides.length;
+    showSlide(sliderIndex);
+};
+
+nextBtn.onclick = () => {
+    sliderIndex = (sliderIndex + 1) % slides.length;
+    showSlide(sliderIndex);
+};
+
+slides.forEach((img,index)=>{
+    img.addEventListener("click",()=>{
+        openLightbox(index);
+    });
+});
+
+function openLightbox(startIndex){
+    lightboxIndex = startIndex;
+
+    const track = document.getElementById("lightboxTrack");
+    const counter = document.getElementById("lightboxCounter");
+    const box = document.getElementById("lightbox");
+
+    track.innerHTML = images.map((img,i)=>`
+        <img src="${img}" class="${i===startIndex ? 'active':''}">
+    `).join("");
+
+    counter.textContent = (startIndex + 1) + " / " + images.length;
+
+    box.classList.add("open");
+    document.body.style.overflow = "hidden";
+
+    track.addEventListener("touchstart",handleTouchStart,{passive:true});
+    track.addEventListener("touchend",handleTouchEnd,{passive:true});
+}
+
+function closeLightbox(){
+    document.getElementById("lightbox").classList.remove("open");
+    document.body.style.overflow = "";
+}
+
+function moveLightbox(direction){
+    const lbSlides = document.querySelectorAll("#lightboxTrack img");
+
+    lbSlides[lightboxIndex].classList.remove("active");
+
+    lightboxIndex += direction;
+
+    if(lightboxIndex < 0) lightboxIndex = images.length - 1;
+    if(lightboxIndex >= images.length) lightboxIndex = 0;
+
+    lbSlides[lightboxIndex].classList.add("active");
+
+    document.getElementById("lightboxCounter").textContent =
+        (lightboxIndex + 1) + " / " + images.length;
+}
+
+function handleTouchStart(e){
+    touchStartX = e.changedTouches[0].screenX;
+}
+
+function handleTouchEnd(e){
+    touchEndX = e.changedTouches[0].screenX;
+
+    const diff = touchEndX - touchStartX;
+
+    if(Math.abs(diff) < 40) return;
+
+    if(diff < 0){
+        moveLightbox(1);
+    }else{
+        moveLightbox(-1);
+    }
+}
+
+document.addEventListener("keydown",(e)=>{
+    const box = document.getElementById("lightbox");
+
+    if(!box.classList.contains("open")) return;
+
+    if(e.key === "Escape") closeLightbox();
+    if(e.key === "ArrowLeft") moveLightbox(-1);
+    if(e.key === "ArrowRight") moveLightbox(1);
+});
+</script>
+
+</body>
+</html>
