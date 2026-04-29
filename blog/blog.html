@@ -211,6 +211,31 @@ async function loadBlogPosts() {
         }
 
         const data = await res.json();
+        
+        function parseGermanDateForSort(value) {
+    if (!value) return 0;
+
+    const text = String(value).trim();
+
+    // nimmt bei "21.08-28.08.2025" automatisch den rechten Teil
+    const lastPart = text.split("-").pop().trim();
+
+    const match = lastPart.match(/(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+    if (!match) return 0;
+
+    const day = Number(match[1]);
+    const month = Number(match[2]) - 1;
+    const year = Number(match[3]);
+
+    return new Date(year, month, day).getTime();
+}
+
+data.sort((a, b) => {
+    const dateA = parseGermanDateForSort(a.dateRange || a.date);
+    const dateB = parseGermanDateForSort(b.dateRange || b.date);
+
+    return dateB - dateA;
+});
 
         if (!Array.isArray(data) || data.length === 0) {
             grid.innerHTML = "";
