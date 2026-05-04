@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lebenslauf</title>
+  <link rel="stylesheet" href="Lebenslaufstyle.css">
+</head>
+<body>
+
+<header class="topbar">
+  <a href="../index.html" class="nav-link">← Home</a>
+</header>
+
+<main class="cv-page">
+  <section class="cv-hero">
+    <div>
+      <h1>Lebenslauf</h1>
+      <h2 id="name">Tim Bellinghausen</h2>
+
+      <div class="info-grid">
+        <div><span>Geburtstag</span><p id="geburtstag"></p></div>
+        <div><span>Adresse</span><p id="adresse"></p></div>
+        <div><span>Telefon</span><p id="telefon"></p></div>
+        <div><span>E-Mail</span><p id="email"></p></div>
+      </div>
+    </div>
+
+    <img id="profilbild" class="profile-img" src="" alt="Profilbild">
+  </section>
+
+  <section class="cv-section">
+    <h2>Berufserfahrung</h2>
+    <div id="berufserfahrung" class="entry-list"></div>
+  </section>
+
+  <section class="cv-section">
+    <h2>Ausbildung</h2>
+    <div id="ausbildung" class="entry-list"></div>
+  </section>
+
+  <section class="cv-section">
+    <h2>Kenntnisse und Interessen</h2>
+    <div id="kenntnisse" class="entry-list"></div>
+  </section>
+</main>
+
+<script>
+async function loadCV() {
+  const res = await fetch("content/lebenslauf.json?v=" + Date.now());
+  const data = await res.json();
+
+  document.getElementById("name").textContent = data.name || "";
+  document.getElementById("geburtstag").textContent = data.geburtstag || "";
+  document.getElementById("adresse").textContent = data.adresse || "";
+  document.getElementById("telefon").textContent = data.telefon || "";
+  document.getElementById("email").textContent = data.email || "";
+
+  if (data.profilbild) {
+    document.getElementById("profilbild").src = data.profilbild;
+  }
+
+  renderEntries("berufserfahrung", data.berufserfahrung);
+  renderEntries("ausbildung", data.ausbildung);
+  renderEntries("kenntnisse", data.kenntnisse);
+}
+
+function renderEntries(id, entries = []) {
+  const box = document.getElementById(id);
+  box.innerHTML = "";
+
+  entries.forEach(entry => {
+    box.innerHTML += `
+      <div class="cv-entry">
+        <div class="date">${entry.zeit || ""}</div>
+        <div class="text">
+          <h3>${entry.titel || ""}</h3>
+          <p>${(entry.text || "").replace(/\n/g, "<br>")}</p>
+        </div>
+      </div>
+    `;
+  });
+}
+
+loadCV();
+</script>
+
+</body>
+</html>
