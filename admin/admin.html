@@ -13,7 +13,6 @@ body {
     margin: 0;
 }
 
-/* LOGIN */
 #loginOverlay {
     position: fixed;
     inset: 0;
@@ -26,14 +25,12 @@ body {
     z-index: 999;
 }
 
-/* CONTAINER */
 .container {
     max-width: 900px;
     margin: 20px auto;
     padding: 15px;
 }
 
-/* INPUTS */
 input,
 textarea,
 select {
@@ -51,7 +48,6 @@ textarea {
     resize: vertical;
 }
 
-/* BUTTONS */
 button,
 .file-label {
     padding: 12px;
@@ -68,7 +64,6 @@ button,
     display: inline-block;
 }
 
-/* CARD */
 .card {
     border: 1px solid #334155;
     padding: 15px;
@@ -77,7 +72,6 @@ button,
     background: #020617;
 }
 
-/* FILE PICKER */
 .file-input {
     display: none;
 }
@@ -95,14 +89,12 @@ button,
     word-break: break-word;
 }
 
-/* STATUS */
 .status-text {
     margin-top: 8px;
     color: #cbd5e1;
     font-size: 14px;
 }
 
-/* SLIDER */
 .slider {
     position: relative;
     width: 100%;
@@ -130,7 +122,7 @@ button,
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(0,0,0,0.6);
+    background: rgba(0, 0, 0, 0.6);
     width: auto;
     padding: 8px 12px;
     margin: 0;
@@ -139,7 +131,6 @@ button,
 .slider .prev { left: 5px; }
 .slider .next { right: 5px; }
 
-/* MOBILE */
 @media (max-width: 600px) {
     h1 { font-size: 22px; }
     h2 { font-size: 18px; }
@@ -166,14 +157,12 @@ button,
     <input type="password" id="passwordInput" placeholder="Passwort">
     <button onclick="login()">Login</button>
     <p id="error" style="color:red;"></p>
-    
-    <div style="margin-top:20px;text-align:center;font-size:14px;opacity:.85;">
-  <a href="/rechtliches.html" style="color:white;text-decoration:none;">
-    Impressum / Datenschutz
-  </a>
 
-</div>
-    
+    <div style="margin-top:20px;text-align:center;font-size:14px;opacity:.85;">
+        <a href="/rechtliches.html" style="color:white;text-decoration:none;">
+            Impressum / Datenschutz
+        </a>
+    </div>
 </div>
 
 <!-- ADMIN -->
@@ -192,26 +181,27 @@ button,
 
         <input type="text" id="title" placeholder="Titel">
         <textarea id="comment" placeholder="Kommentar"></textarea>
-<div id="gameDateUploadWrap" style="display:none">
-    <label for="gameDateUpload">Spieldatum</label>
-    <input type="date" id="gameDateUpload">
-</div>
+
+        <div id="gameDateUploadWrap" style="display:none;">
+            <label for="gameDateUpload">Spieldatum</label>
+            <input type="date" id="gameDateUpload">
+        </div>
+
         <div class="file-picker-row">
             <label for="file" class="file-label">Bilder auswählen</label>
-         ${type === "spiele" ? `
-    <label for="date-${i}">Spieldatum</label>
-    <input
-        type="date"
-        id="date-${i}"
-        value="${/^\d{4}-\d{2}-\d{2}$/.test(item.date || "") ? item.date : ""}"
-    >
-` : ""}
-               <input type="file" id="file" class="file-input" multiple accept="image/*">
-            <div class="file-name" id="fileName">Keine Dateien ausgewählt</div>
+            <input
+                type="file"
+                id="file"
+                class="file-input"
+                multiple
+                accept="image/*"
+            >
+            <div class="file-name" id="fileName">
+                Keine Dateien ausgewählt
+            </div>
         </div>
 
         <button onclick="upload()">Hochladen</button>
-
         <p id="status" class="status-text"></p>
     </div>
 
@@ -258,6 +248,7 @@ function updateFileLabel(inputId, labelId) {
     if (!input || !label) return;
 
     const count = input.files.length;
+
     if (count === 0) {
         label.textContent = "Keine Dateien ausgewählt";
     } else if (count === 1) {
@@ -265,6 +256,26 @@ function updateFileLabel(inputId, labelId) {
     } else {
         label.textContent = count + " Dateien ausgewählt";
     }
+}
+
+function updateGameDateVisibility() {
+    document.getElementById("gameDateUploadWrap").style.display =
+        document.getElementById("category").value === "spiele"
+            ? "block"
+            : "none";
+}
+
+async function imageToBase64(file) {
+    const compressed = await compressImage(file);
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(
+            new Error("Bild konnte nicht gelesen werden.")
+        );
+        reader.readAsDataURL(compressed);
+    });
 }
 
 /* LOGIN */
@@ -282,13 +293,14 @@ async function login() {
             PASSWORD = pw;
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("adminPanel").style.display = "block";
-            document.getElementById("error").innerText = "";
+            document.getElementById("error").textContent = "";
             loadEntries();
         } else {
-            document.getElementById("error").innerText = "Falsches Passwort";
+            document.getElementById("error").textContent =
+                "Falsches Passwort";
         }
     } catch (e) {
-        alert("Fehler beim Login: " + e);
+        alert("Fehler beim Login: " + e.message);
     }
 }
 
@@ -299,8 +311,8 @@ async function upload() {
     const comment = document.getElementById("comment").value.trim();
     const category = document.getElementById("category").value;
     const date = category === "spiele"
-    ? document.getElementById("gameDateUpload").value
-    : undefined;
+        ? document.getElementById("gameDateUpload").value
+        : undefined;
     const status = document.getElementById("status");
 
     if (files.length === 0 || !title) {
@@ -308,25 +320,16 @@ async function upload() {
         return;
     }
 
-    status.textContent = "Bilder werden verarbeitet...";
-
-    let images = [];
-
-    for (let file of files) {
-        if (images.length >= 10) break;
-
-        const compressed = await compressImage(file);
-
-        const base64 = await new Promise(resolve => {
-            const reader = new FileReader();
-            reader.onload = e => resolve(e.target.result);
-            reader.readAsDataURL(compressed);
-        });
-
-        images.push(base64);
-    }
-
     try {
+        status.textContent = "Bilder werden verarbeitet...";
+
+        const images = [];
+
+        for (const file of files) {
+            if (images.length >= 10) break;
+            images.push(await imageToBase64(file));
+        }
+
         status.textContent = "Upload läuft...";
 
         const res = await fetch("/api/upload", {
@@ -337,6 +340,7 @@ async function upload() {
                 category,
                 title,
                 comment,
+                date,
                 password: PASSWORD
             })
         });
@@ -347,8 +351,9 @@ async function upload() {
         if (res.ok) {
             document.getElementById("title").value = "";
             document.getElementById("comment").value = "";
-        document.getElementById("gameDateUpload").value = "";
+            document.getElementById("gameDateUpload").value = "";
             document.getElementById("file").value = "";
+
             updateFileLabel("file", "fileName");
             status.textContent = "Upload erfolgreich";
             loadEntries();
@@ -357,18 +362,26 @@ async function upload() {
         }
     } catch (e) {
         status.textContent = "Upload fehlgeschlagen";
-        alert("Fehler beim Upload: " + e);
+        alert("Fehler beim Upload: " + e.message);
     }
 }
 
 /* IMAGE COMPRESS */
-async function compressImage(file) {
-    return new Promise(resolve => {
+function compressImage(file) {
+    return new Promise((resolve, reject) => {
         const img = new Image();
         const reader = new FileReader();
 
-        reader.onload = e => {
-            img.src = e.target.result;
+        reader.onerror = () => reject(
+            new Error("Bild konnte nicht gelesen werden.")
+        );
+
+        img.onerror = () => reject(
+            new Error("Bildformat konnte nicht verarbeitet werden.")
+        );
+
+        reader.onload = () => {
+            img.src = reader.result;
         };
 
         img.onload = () => {
@@ -380,9 +393,20 @@ async function compressImage(file) {
             canvas.height = Math.round(img.height * scale);
 
             const ctx = canvas.getContext("2d");
+
+            if (!ctx) {
+                reject(new Error("Bildverarbeitung nicht verfügbar."));
+                return;
+            }
+
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
             canvas.toBlob(blob => {
+                if (!blob) {
+                    reject(new Error("Bild konnte nicht komprimiert werden."));
+                    return;
+                }
+
                 resolve(new File(
                     [blob],
                     file.name.replace(/\.[^.]+$/, "") + ".jpg",
@@ -399,14 +423,6 @@ async function compressImage(file) {
 function initSlider(container) {
     let index = 0;
     const slides = container.querySelectorAll("img");
-
-    if (!slides.length) return;
-
-    function show(i) {
-        slides.forEach(s => s.classList.remove("active"));
-        slides[i].classList.add("active");
-    }
-
     const nextBtn = container.querySelector(".next");
     const prevBtn = container.querySelector(".prev");
 
@@ -414,6 +430,11 @@ function initSlider(container) {
         if (nextBtn) nextBtn.style.display = "none";
         if (prevBtn) prevBtn.style.display = "none";
         return;
+    }
+
+    function show(i) {
+        slides.forEach(slide => slide.classList.remove("active"));
+        slides[i].classList.add("active");
     }
 
     nextBtn.onclick = () => {
@@ -430,45 +451,67 @@ function initSlider(container) {
 /* LOAD */
 async function loadEntries() {
     const type = document.getElementById("viewCategory").value;
+    const container = document.getElementById("entries");
 
     try {
-        const res = await fetch(`/content/${type}.json`);
-        const data = await res.json();
+        const res = await fetch(`/content/${type}.json`, {
+            cache: "no-store"
+        });
 
-        const container = document.getElementById("entries");
-
-       const sortedEntries = data.map((item, originalIndex) => ({
-    item,
-    originalIndex
-}));
-
-if (type === "spiele") {
-    sortedEntries.sort((a, b) => {
-        const ad = a.item.date || "";
-        const bd = b.item.date || "";
-
-        if (!ad && !bd) {
-            return a.originalIndex - b.originalIndex;
+        if (!res.ok) {
+            throw new Error("Inhalte konnten nicht geladen werden.");
         }
 
-        if (!ad) return 1;
-        if (!bd) return -1;
+        const data = await res.json();
 
-        return bd.localeCompare(ad)
-            || a.originalIndex - b.originalIndex;
-    });
-}
+        if (!Array.isArray(data)) {
+            throw new Error("Ungültiges Datenformat.");
+        }
 
-container.innerHTML = sortedEntries.map(({ item, originalIndex }, i) => {
+        // Verhindert, dass eine ältere Anfrage die neue Kategorie überschreibt.
+        if (document.getElementById("viewCategory").value !== type) return;
+
+        const sortedEntries = data.map((item, originalIndex) => ({
+            item,
+            originalIndex
+        }));
+
+        if (type === "spiele") {
+            sortedEntries.sort((a, b) => {
+                const ad = a.item.date || "";
+                const bd = b.item.date || "";
+
+                if (!ad && !bd) {
+                    return a.originalIndex - b.originalIndex;
+                }
+
+                if (!ad) return 1;
+                if (!bd) return -1;
+
+                return bd.localeCompare(ad)
+                    || a.originalIndex - b.originalIndex;
+            });
+        }
+
+        container.innerHTML = sortedEntries.map(({ item }, i) => {
             const imageList = getImageList(item);
             const safeTitle = escapeHtml(item.title || "");
-            const safeComment = escapeHtml(item.comment || item.description || "");
+            const safeComment = escapeHtml(
+                item.comment || item.description || ""
+            );
+            const safeDate = /^\d{4}-\d{2}-\d{2}$/.test(item.date || "")
+                ? item.date
+                : "";
 
             return `
                 <div class="card">
                     <div class="slider" id="slider-${i}">
                         ${imageList.map((img, j) => `
-                            <img src="${img}" class="${j === 0 ? "active" : ""}" alt="${safeTitle}">
+                            <img
+                                src="${escapeHtml(img)}"
+                                class="${j === 0 ? "active" : ""}"
+                                alt="${safeTitle}"
+                            >
                         `).join("")}
 
                         <button class="prev" type="button">❮</button>
@@ -478,67 +521,91 @@ container.innerHTML = sortedEntries.map(({ item, originalIndex }, i) => {
                     <input value="${safeTitle}" id="title-${i}">
                     <textarea id="comment-${i}">${safeComment}</textarea>
 
+                    ${type === "spiele" ? `
+                        <label for="date-${i}">Spieldatum</label>
+                        <input
+                            type="date"
+                            id="date-${i}"
+                            value="${safeDate}"
+                        >
+                    ` : ""}
+
                     <div class="file-picker-row">
-                        <label for="file-${i}" class="file-label">Neue Bilder auswählen</label>
-                        <input type="file" id="file-${i}" class="file-input" multiple accept="image/*">
-                        <div class="file-name" id="fileName-${i}">Keine Dateien ausgewählt</div>
+                        <label for="file-${i}" class="file-label">
+                            Neue Bilder auswählen
+                        </label>
+                        <input
+                            type="file"
+                            id="file-${i}"
+                            class="file-input"
+                            multiple
+                            accept="image/*"
+                        >
+                        <div class="file-name" id="fileName-${i}">
+                            Keine Dateien ausgewählt
+                        </div>
                     </div>
 
-                  <button onclick="saveEdit('${type}', '${item.id || ""}', ${originalIndex}, ${i})">
-    💾 Speichern
-</button>
-
-<button onclick="deleteEntry('${type}', '${item.id || ""}', ${originalIndex})">
-    ❌ Löschen
-</button>
+                    <button type="button" id="save-${i}">
+                        💾 Speichern
+                    </button>
+                    <button type="button" id="delete-${i}">
+                        ❌ Löschen
+                    </button>
+                </div>
             `;
         }).join("");
 
-        setTimeout(() => {
-            document.querySelectorAll(".slider").forEach(initSlider);
+        container.querySelectorAll(".slider").forEach(initSlider);
 
-            data.forEach((_, i) => {
-                const input = document.getElementById(`file-${i}`);
-                if (input) {
-                    input.addEventListener("change", () => {
-                        updateFileLabel(`file-${i}`, `fileName-${i}`);
-                    });
-                }
-            });
-        }, 50);
+        sortedEntries.forEach(({ item, originalIndex }, i) => {
+            document.getElementById(`file-${i}`).addEventListener(
+                "change",
+                () => updateFileLabel(`file-${i}`, `fileName-${i}`)
+            );
+
+            document.getElementById(`save-${i}`).addEventListener(
+                "click",
+                () => saveEdit(type, item.id || "", originalIndex, i)
+            );
+
+            document.getElementById(`delete-${i}`).addEventListener(
+                "click",
+                () => deleteEntry(type, item.id || "", originalIndex)
+            );
+        });
 
     } catch (e) {
-        alert("Fehler beim Laden: " + e);
+        alert("Fehler beim Laden: " + e.message);
     }
 }
 
 /* EDIT */
 async function saveEdit(type, id, index, displayIndex = index) {
-    const title = document.getElementById(`title-${displayIndex}`).value;
-const comment = document.getElementById(`comment-${displayIndex}`).value;
-const files = document.getElementById(`files-${displayIndex}`).files;
-const date = type === "spiele"
-    ? document.getElementById(`date-${displayIndex}`).value
-    : undefined;
-    let images = [];
-
-    if (files.length > 0) {
-        for (let file of files) {
-            if (images.length >= 10) break;
-
-            const compressed = await compressImage(file);
-
-            const base64 = await new Promise(resolve => {
-                const reader = new FileReader();
-                reader.onload = e => resolve(e.target.result);
-                reader.readAsDataURL(compressed);
-            });
-
-            images.push(base64);
-        }
-    }
-
     try {
+        const title = document.getElementById(
+            `title-${displayIndex}`
+        ).value.trim();
+
+        const comment = document.getElementById(
+            `comment-${displayIndex}`
+        ).value.trim();
+
+        const files = document.getElementById(
+            `file-${displayIndex}`
+        ).files;
+
+        const date = type === "spiele"
+            ? document.getElementById(`date-${displayIndex}`).value
+            : undefined;
+
+        const images = [];
+
+        for (const file of files) {
+            if (images.length >= 10) break;
+            images.push(await imageToBase64(file));
+        }
+
         const res = await fetch("/api/edit", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -556,9 +623,12 @@ const date = type === "spiele"
 
         const data = await res.json();
         alert(data.message);
-        loadEntries();
+
+        if (res.ok) {
+            loadEntries();
+        }
     } catch (e) {
-        alert("Fehler beim Speichern: " + e);
+        alert("Fehler beim Speichern: " + e.message);
     }
 }
 
@@ -580,30 +650,31 @@ async function deleteEntry(type, id, index) {
 
         const data = await res.json();
         alert(data.message);
-        loadEntries();
+
+        if (res.ok) {
+            loadEntries();
+        }
     } catch (e) {
-        alert("Fehler beim Löschen: " + e);
+        alert("Fehler beim Löschen: " + e.message);
     }
-    function updateGameDateVisibility() {
-    document.getElementById("gameDateUploadWrap").style.display =
-        document.getElementById("category").value === "spiele"
-            ? "block"
-            : "none";
 }
+
+/* EVENTS */
+document.getElementById("viewCategory").addEventListener(
+    "change",
+    loadEntries
+);
 
 document.getElementById("category").addEventListener(
     "change",
     updateGameDateVisibility
 );
 
-updateGameDateVisibility();
-}
-
-/* EVENTS */
-document.getElementById("viewCategory").addEventListener("change", loadEntries);
 document.getElementById("file").addEventListener("change", () => {
     updateFileLabel("file", "fileName");
 });
+
+updateGameDateVisibility();
 </script>
 
 </body>
