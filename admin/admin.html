@@ -584,6 +584,19 @@ async function deleteEntry(type, id, index) {
     } catch (e) {
         alert("Fehler beim Löschen: " + e);
     }
+    function updateGameDateVisibility() {
+    document.getElementById("gameDateUploadWrap").style.display =
+        document.getElementById("category").value === "spiele"
+            ? "block"
+            : "none";
+}
+
+document.getElementById("category").addEventListener(
+    "change",
+    updateGameDateVisibility
+);
+
+updateGameDateVisibility();
 }
 
 /* EVENTS */
