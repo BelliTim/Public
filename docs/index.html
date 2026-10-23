@@ -278,9 +278,15 @@ const container = document.getElementById("spiele-container");
                         ` : ""}
                     </div>
 
-                    <h3>${item.title || ""}</h3>
-                    <p>${item.comment || item.description || ""}</p>
-                </div>
+                   <h3>${item.title || ""}</h3>
+
+${/^\d{4}-\d{2}-\d{2}$/.test(item.date || "") ? `
+    <p style="font-size:14px; color:#cbd5e1;">
+        ${item.date.split("-").reverse().join(".")}
+    </p>
+` : ""}
+
+<p>${item.comment || item.description || ""}</p> </div>
             `;
         }).join("");
 
