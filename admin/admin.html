@@ -339,7 +339,7 @@ async function upload() {
         if (res.ok) {
             document.getElementById("title").value = "";
             document.getElementById("comment").value = "";
-            document.getElementById("gameDateUpload").value = "";
+        document.getElementById("gameDateUpload").value = "";
             document.getElementById("file").value = "";
             updateFileLabel("file", "fileName");
             status.textContent = "Upload erfolgreich";
@@ -429,7 +429,29 @@ async function loadEntries() {
 
         const container = document.getElementById("entries");
 
-        container.innerHTML = data.map((item, i) => {
+       const sortedEntries = data.map((item, originalIndex) => ({
+    item,
+    originalIndex
+}));
+
+if (type === "spiele") {
+    sortedEntries.sort((a, b) => {
+        const ad = a.item.date || "";
+        const bd = b.item.date || "";
+
+        if (!ad && !bd) {
+            return a.originalIndex - b.originalIndex;
+        }
+
+        if (!ad) return 1;
+        if (!bd) return -1;
+
+        return bd.localeCompare(ad)
+            || a.originalIndex - b.originalIndex;
+    });
+}
+
+container.innerHTML = sortedEntries.map(({ item, originalIndex }, i) => {
             const imageList = getImageList(item);
             const safeTitle = escapeHtml(item.title || "");
             const safeComment = escapeHtml(item.comment || item.description || "");
