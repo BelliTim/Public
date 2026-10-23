@@ -102,7 +102,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ message: "Nur POST erlaubt" });
     }
 
-    const { images, category, title, dateRange, comment, password } = req.body || {};
+    const { images, category, title, dateRange, date, comment, password } = req.body || {};
 
     if (password !== process.env.ADMIN_PASSWORD) {
         return res.status(401).json({ message: "Falsches Passwort" });
