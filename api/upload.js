@@ -170,6 +170,17 @@ export default async function handler(req, res) {
         if (category === "blog") {
             newEntry.dateRange = safeDateRange;
         }
+        if (category === "spiele") {
+    const gameDate = String(date ?? "").trim();
+
+    if (gameDate && !/^\d{4}-\d{2}-\d{2}$/.test(gameDate)) {
+        return res.status(400).json({
+            message: "Ungültiges Spieldatum"
+        });
+    }
+
+    newEntry.date = gameDate;
+}
 
         data.unshift(newEntry);
 
