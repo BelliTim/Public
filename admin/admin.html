@@ -339,6 +339,7 @@ async function upload() {
         if (res.ok) {
             document.getElementById("title").value = "";
             document.getElementById("comment").value = "";
+            document.getElementById("gameDateUpload").value = "";
             document.getElementById("file").value = "";
             updateFileLabel("file", "fileName");
             status.textContent = "Upload erfolgreich";
