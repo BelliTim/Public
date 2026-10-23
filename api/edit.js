@@ -119,6 +119,7 @@ export default async function handler(req, res) {
         comment,
         dateRange,
         images,
+        date,
         existingImages,
         password
     } = req.body || {};
