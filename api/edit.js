@@ -167,6 +167,17 @@ export default async function handler(req, res) {
         if (type === "blog") {
             entry.dateRange = String(dateRange ?? "").trim();
         }
+        if (type === "spiele") {
+    const gameDate = String(date ?? "").trim();
+
+    if (gameDate && !/^\d{4}-\d{2}-\d{2}$/.test(gameDate)) {
+        return res.status(400).json({
+            message: "Ungültiges Spieldatum"
+        });
+    }
+
+    entry.date = gameDate;
+}
 
         if (type !== "blog") {
             if (Array.isArray(images) && images.length > 0) {
