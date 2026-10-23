@@ -192,7 +192,10 @@ button,
 
         <input type="text" id="title" placeholder="Titel">
         <textarea id="comment" placeholder="Kommentar"></textarea>
-
+<div id="gameDateUploadWrap" style="display:none">
+    <label for="gameDateUpload">Spieldatum</label>
+    <input type="date" id="gameDateUpload">
+</div>
         <div class="file-picker-row">
             <label for="file" class="file-label">Bilder auswählen</label>
             <input type="file" id="file" class="file-input" multiple accept="image/*">
@@ -287,6 +290,9 @@ async function upload() {
     const title = document.getElementById("title").value.trim();
     const comment = document.getElementById("comment").value.trim();
     const category = document.getElementById("category").value;
+    const date = category === "spiele"
+    ? document.getElementById("gameDateUpload").value
+    : undefined;
     const status = document.getElementById("status");
 
     if (files.length === 0 || !title) {
@@ -504,6 +510,7 @@ async function saveEdit(type, id, index) {
                 index,
                 title,
                 comment,
+                date,
                 images,
                 password: PASSWORD
             })
