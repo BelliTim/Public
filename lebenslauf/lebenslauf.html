@@ -1,85 +1,217 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lebenslauf</title>
-  <link rel="stylesheet" href="Lebenslaufstyle.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Lebenslauf von Tim Bellinghausen – Ausbildung, praktische Erfahrungen und Kenntnisse.">
+<title>Lebenslauf · Tim Bellinghausen</title>
+<link rel="stylesheet" href="/docs/Styles.css">
+<style>
+@font-face{font-family:Poppins;src:url('/fonts/poppins-v24-latin-regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:Poppins;src:url('/fonts/poppins-v24-latin-500.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:Poppins;src:url('/fonts/poppins-v24-latin-700.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+*{box-sizing:border-box}
+body{margin:0;background:#0f172a;color:#fff;font-family:Poppins,Arial,sans-serif;line-height:1.65}
+html{scroll-behavior:smooth;scroll-padding-top:100px}
+a{color:inherit}
+.cv-nav{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:20px max(24px,calc((100vw - 1080px)/2));background:#020617;position:sticky;top:0;z-index:1000;border-bottom:1px solid #ffffff0d}
+.cv-nav a{margin:0;text-decoration:none;font-size:14px;font-weight:500}
+.cv-nav a:hover{color:#38bdf8}
+.cv-nav .cv-nav-title{color:#94a3b8;font-size:13px}
+.cv-shell{max-width:1080px;margin:0 auto;padding:0 24px 64px}
+.cv-hero{padding:80px 0 44px;max-width:780px}
+.cv-eyebrow{margin:0 0 16px;color:#38bdf8;font-size:12px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+.cv-hero h1{font-size:clamp(38px,7vw,68px);line-height:1.12;letter-spacing:-.045em;margin:0 0 22px;overflow-wrap:break-word}
+.cv-intro{font-size:clamp(16px,2.4vw,20px);margin:0;color:#cbd5e1;max-width:650px}
+.cv-intro strong{color:#fff;font-weight:500}
+.cv-jump{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+.cv-jump a{padding:9px 16px;border:1px solid #334155;border-radius:999px;font-size:13px;text-decoration:none;color:#cbd5e1;transition:.2s}
+.cv-jump a:hover{border-color:#38bdf8;color:#38bdf8;background:#38bdf80a}
+.cv-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:24px;align-items:start}
+.cv-column{display:grid;gap:24px;min-width:0}
+.cv-panel{background:linear-gradient(180deg,#020617 0%,#030b23 100%);padding:30px;border-radius:28px;box-shadow:0 18px 40px #00000038;border:1px solid #ffffff08;min-width:0}
+.cv-panel h2{font-size:23px;letter-spacing:-.025em;line-height:1.3;margin:0 0 24px}
+.cv-item{padding:0 0 22px;margin-bottom:22px;border-bottom:1px solid #ffffff12}
+.cv-item:last-child{padding-bottom:0;margin-bottom:0;border-bottom:0}
+.cv-label{margin:0 0 6px;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#7dd3fc;font-weight:500}
+.cv-item h3{font-size:17px;line-height:1.45;margin:0 0 6px;font-weight:500}
+.cv-item p{color:#aebdd1;font-size:14px;margin:0}
+.cv-item .cv-place{color:#e2e8f0;margin-bottom:5px}
+.cv-personal{margin-bottom:24px}
+.cv-personal .cv-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 28px}
+.cv-personal .cv-facts>div{padding:0;border:0}
+.cv-personal a{text-decoration:none;overflow-wrap:anywhere}
+.cv-personal a:hover{color:#38bdf8}
+@media(max-width:760px){.cv-personal .cv-facts{grid-template-columns:1fr}.cv-personal{margin-bottom:18px}}
+.cv-facts{margin:0}
+.cv-facts>div{padding:14px 0;border-bottom:1px solid #ffffff12}
+.cv-facts>div:first-child{padding-top:0}
+.cv-facts>div:last-child{padding-bottom:0;border:0}
+.cv-facts dt{font-size:12px;color:#94a3b8;margin-bottom:4px}
+.cv-facts dd{margin:0;font-size:15px}
+.cv-tags{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0;padding:0;list-style:none}
+.cv-tags li{padding:6px 12px;border-radius:999px;background:#0f172a;color:#dbeafe;border:1px solid #1e293b;font-size:12px}
+.cv-note{font-size:14px;color:#aebdd1;margin:0}
+.cv-footer{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;color:#94a3b8;font-size:12px;margin-top:40px;padding-top:24px;border-top:1px solid #ffffff12}
+.cv-footer a{text-decoration:none}
+.cv-footer a:hover{color:#38bdf8}
+:focus-visible{outline:2px solid #38bdf8;outline-offset:5px}
+@media(max-width:760px){.cv-layout{grid-template-columns:1fr}.cv-hero{padding:52px 0 32px}.cv-shell{padding:0 18px 40px}.cv-panel{padding:24px;border-radius:24px}.cv-nav{padding:16px 20px}.cv-panel h2{font-size:22px}.cv-layout,.cv-column{gap:18px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
 </head>
 <body>
+<nav class="cv-nav" aria-label="Seitennavigation">
+<a href="/">← Home</a>
+<span class="cv-nav-title">Tim Bellinghausen</span>
+<a href="#ausbildung">Lebenslauf</a>
+</nav>
 
-<main class="cv-page">
-  <section class="cv-hero">
-    <div>
-      <h1>Lebenslauf</h1>
-      <h2 id="name">Tim Bellinghausen</h2>
+<main class="cv-shell">
+<header class="cv-hero">
+<p class="cv-eyebrow">Lebenslauf</p>
+<h1>Tim<br>Bellinghausen</h1>
 
-      <div class="info-grid">
-        <div><span>Geburtstag</span><p id="geburtstag"></p></div>
-        <div><span>Adresse</span><p id="adresse"></p></div>
-        <div><span>Telefon</span><p id="telefon"></p></div>
-        <div><span>E-Mail</span><p id="email"></p></div>
-      </div>
-    </div>
+<div class="cv-jump" aria-label="Abschnitte">
+<a href="#ausbildung">Ausbildung</a>
+<a href="#erfahrung">Erfahrungen</a>
+<a href="#kenntnisse">Kenntnisse</a>
+</div>
+</header>
 
-    <img id="profilbild" class="profile-img" src="" alt="Profilbild">
-  </section>
+<section class="cv-panel cv-personal" aria-labelledby="person-title">
+<h2 id="person-title">Persönliches</h2>
+<dl class="cv-facts">
+<div><dt>Name</dt><dd>Tim Bellinghausen</dd></div>
+<div><dt>Geburtsdatum</dt><dd><time datetime="2003-08-17">17.08.2003</time></dd></div>
+<div><dt>Geburtsort</dt><dd>Köln</dd></div>
+<div><dt>Wohnort</dt><dd>Köln-Dellbrück</dd></div>
+<div><dt>Telefonnummer</dt><dd><a href="tel:+4917641989656">+49 (0) 176 41989656</a></dd></div>
+<div><dt>E-Mail</dt><dd><a href="mailto:arbeit@tbellinghausen.de">arbeit@tbellinghausen.de</a></dd></div>
+</dl>
+</section>
 
-  <section class="cv-section">
-    <h2>Berufserfahrung</h2>
-    <div id="berufserfahrung" class="entry-list"></div>
-  </section>
+<div class="cv-layout">
+<div class="cv-column">
 
-  <section class="cv-section">
-    <h2>Ausbildung</h2>
-    <div id="ausbildung" class="entry-list"></div>
-  </section>
+<section class="cv-panel" id="ausbildung" aria-labelledby="ausbildung-title">
+<h2 id="ausbildung-title">Schule &amp; Ausbildung</h2>
 
-  <section class="cv-section">
-    <h2>Kenntnisse und Interessen</h2>
-    <div id="kenntnisse" class="entry-list"></div>
-  </section>
+<article class="cv-item">
+<p class="cv-label">2024 – heute · Berufsausbildung</p>
+<h3>Anlagenmechaniker (Industrie)</h3>
+<p class="cv-place">RheinEnergie · Köln &amp; Bergisch Gladbach</p>
+<p>Berufsschule: Berufskolleg 10, Köln-Porz</p>
+<p style="margin-top:10px;">Instandhaltung des Gas- und Wassernetzes</p>
+</article>
+
+<article class="cv-item">
+<p class="cv-label">2013 – 2022 · Schulabschluss: Abitur</p>
+<h3>Gymnasium Thusneldastraße</h3>
+<p>Köln-Deutz</p>
+</article>
+
+<article class="cv-item">
+<p class="cv-label">2009 – 2013 · Grundschule</p>
+<h3>GGS Regenbogenschule</h3>
+<p>Köln-Dellbrück</p>
+</article>
+</section>
+
+<section class="cv-panel" id="erfahrung" aria-labelledby="erfahrung-title">
+<h2 id="erfahrung-title">Jobs &amp; Praktika</h2>
+
+<article class="cv-item">
+<p class="cv-label">2022 – 2026 · Lieferdienst</p>
+<h3>Picnic</h3>
+<p>Lieferfahrer</p>
+</article>
+
+<article class="cv-item">
+<p class="cv-label">2022 · Einzelhandel</p>
+<h3>Einsätze über Zenjob</h3>
+<p>Tätigkeiten bei dm, REWE, HIT, C&amp;A und Alnatura</p>
+</article>
+
+<article class="cv-item">
+<p class="cv-label">2021 – 2022 · Lagerarbeit</p>
+<h3>PHOENIX Pharmahandel</h3>
+<p>Lagerarbeit</p>
+</article>
+
+<article class="cv-item">
+<p class="cv-label">2020 – 2021 · Lieferdienst</p>
+<h3>Wolt</h3>
+<p>Lieferfahrer mit dem Fahrrad</p>
+</article>
+
+<article class="cv-item">
+<p class="cv-label">2019 · Praktikum</p>
+<h3>Tektronix</h3>
+<p style="font-size:12px;">Reparieren und Auslesen von Messgeräten</p>
+</article>
+
+<article class="cv-item">
+<p class="cv-label">2019 · Sozialpraktikum</p>
+<h3>Evangelische Kirche</h3>
+<p>Kinderbetreuung und Mitarbeit in der Flüchtlingshilfe</p>
+</article>
+</section>
+</div>
+
+<aside class="cv-column" aria-label="Kenntnisse und Führerschein">
+
+<section class="cv-panel" id="kenntnisse" aria-labelledby="kenntnisse-title">
+<h2 id="kenntnisse-title">Kenntnisse</h2>
+
+<div class="cv-item">
+<h3>Technische Kenntnisse</h3>
+<p>Lesen technischer Zeichnungen</p>
+<p>Grundlagen im Schweißen und Löten</p>
+</div>
+
+<div class="cv-item">
+<h3>Microsoft Office</h3>
+<p>Kenntnisse in folgenden Programmen:</p>
+<ul class="cv-tags" aria-label="Office-Programme">
+<li>Word</li>
+<li>PowerPoint</li>
+<li>Excel</li>
+</ul>
+</div>
+</section>
+
+<section class="cv-panel" aria-labelledby="sprachen-title">
+<h2 id="sprachen-title">Sprachen</h2>
+<dl class="cv-facts">
+<div><dt>Deutsch</dt><dd>Muttersprache</dd></div>
+<div><dt>Englisch</dt><dd>Gute Kenntnisse</dd></div>
+<div><dt>Niederländisch</dt><dd>Geringe Kenntnisse</dd></div>
+</dl>
+</section>
+
+<section class="cv-panel" aria-labelledby="mobil-title">
+<h2 id="mobil-title">Führerschein</h2>
+<p style="margin:0 0 6px;font-size:20px;font-weight:700;color:#7dd3fc">B197</p>
+<p class="cv-note">Klasse B mit Schlüsselzahl 197</p>
+</section>
+
+<section class="cv-panel" aria-labelledby="interessen-title">
+<h2 id="interessen-title">Interessen</h2>
+<ul class="cv-tags" aria-label="Interessen">
+<li>⚽ Fußball</li>
+<li>🚴 Radfahren</li>
+<li>🏸 Badminton &amp; Federball</li>
+</ul>
+</section>
+
+</aside>
+</div>
+
+<footer class="cv-footer">
+<span>Tim Bellinghausen</span>
+<a href="/rechtliches.html">Impressum / Datenschutz</a>
+</footer>
 </main>
-
-<script>
-async function loadCV() {
-  const res = await fetch("content/lebenslauf.json?v=" + Date.now());
-  const data = await res.json();
-
-  document.getElementById("name").textContent = data.name || "";
-  document.getElementById("geburtstag").textContent = data.geburtstag || "";
-  document.getElementById("adresse").textContent = data.adresse || "";
-  document.getElementById("telefon").textContent = data.telefon || "";
-  document.getElementById("email").textContent = data.email || "";
-
-  if (data.profilbild) {
-    document.getElementById("profilbild").src = data.profilbild;
-  }
-
-  renderEntries("berufserfahrung", data.berufserfahrung);
-  renderEntries("ausbildung", data.ausbildung);
-  renderEntries("kenntnisse", data.kenntnisse);
-}
-
-function renderEntries(id, entries = []) {
-  const box = document.getElementById(id);
-  box.innerHTML = "";
-
-  entries.forEach(entry => {
-    box.innerHTML += `
-      <div class="cv-entry">
-        <div class="date">${entry.zeit || ""}</div>
-        <div class="text">
-          <h3>${entry.titel || ""}</h3>
-          <p>${(entry.text || "").replace(/\n/g, "<br>")}</p>
-        </div>
-      </div>
-    `;
-  });
-}
-
-loadCV();
-</script>
-
 </body>
 </html>
